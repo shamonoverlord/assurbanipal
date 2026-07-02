@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Assurbanipal - 大図書館</title>
+    <meta name="description" content="非公式ファンゲーム集 Assurbanipal 大図書館">
+    <link rel="stylesheet" href="css/style.css">
+  </head>
+  <body>
+    <div class="site-shell">
+      <header class="site-header" aria-label="サイトヘッダー">
+        <div class="banner-mark" aria-hidden="true"></div>
+        <div class="title-block">
+          <p class="gem-line" aria-hidden="true">◆</p>
+          <h1>Assurbanipal</h1>
+          <p class="subtitle">大図書館</p>
+        </div>
+        <button class="menu-button" type="button" aria-label="メニュー">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </header>
+
+      <main class="library" aria-label="大図書館">
+        <section class="bookshelf" aria-labelledby="shelf-title">
+          <h2 id="shelf-title" class="visually-hidden">魔導書の本棚</h2>
+          <div class="featured-shelf" id="gameShelf"></div>
+        </section>
+
+        <section class="reception" aria-label="受付">
+          <div class="speech" id="receptionSpeech" aria-live="polite">
+            ようこそ、旅人様。<br>
+            本日はどの魔導書をご覧になりますか？
+          </div>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <p>
+          ※このサイトは非公式のファンサイトです。公式・権利者各位とは一切関係ありません。<br>
+          作品に関する権利は各権利者に帰属します。無料・広告なし・登録なしで公開しています。
+        </p>
+        <nav class="footer-actions" aria-label="補助メニュー">
+          <a class="frame-button" href="notice.html">お知らせ</a>
+          <button class="frame-button" type="button" id="howToPlayButton">遊び方</button>
+        </nav>
+      </footer>
+    </div>
+
+    <div class="entry-gate" id="entryGate" hidden>
+      <div class="entry-panel" role="dialog" aria-modal="true" aria-labelledby="entryTitle">
+        <p class="entry-kicker">非公式ファンゲーム集</p>
+        <h2 id="entryTitle">Assurbanipal 大図書館</h2>
+        <p>このサイトは個人が制作・公開している非公式ファンゲーム集です。</p>
+        <p>公式・権利者各位とは一切関係ありません。作品に関する権利は各権利者に帰属します。</p>
+        <p>無料・広告なし・登録なしで公開しています。</p>
+        <button class="primary-button" type="button" id="enterLibraryButton">大図書館へ入る</button>
+      </div>
+    </div>
+
+    <div class="modal-backdrop" id="gameModal" hidden>
+      <section class="game-modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <button class="modal-close" type="button" id="modalClose" aria-label="閉じる">×</button>
+        <div class="modal-book" id="modalBook" aria-hidden="true"></div>
+        <div class="modal-content">
+          <p class="modal-number" id="modalNumber"></p>
+          <h2 id="modalTitle"></h2>
+          <div class="game-thumb" id="modalThumb" aria-hidden="true"></div>
+          <p class="modal-description" id="modalDescription"></p>
+          <a class="primary-button play-link" id="modalPlayLink" href="#">遊ぶ</a>
+        </div>
+      </section>
+    </div>
+
+    <script src="js/main.js"></script>
+  </body>
+</html>
