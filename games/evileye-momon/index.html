@@ -1,0 +1,920 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Evileye & Momon Drop Puzzle</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #19140f;
+      --panel: #2a2119;
+      --panel-2: #3a2a1d;
+      --ink: #fff4d8;
+      --muted: #d7bd8a;
+      --accent: #86d1ff;
+      --danger: #ff6e72;
+      --gold: #ffd36a;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      background:
+        radial-gradient(circle at top left, rgba(134, 209, 255, 0.18), transparent 32rem),
+        linear-gradient(180deg, #201912 0%, #0f0c09 100%);
+      color: var(--ink);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      overflow-x: hidden;
+      touch-action: manipulation;
+      user-select: none;
+    }
+
+    body {
+      height: 100vh;
+      height: 100dvh;
+      display: grid;
+      place-items: center;
+      padding: 14px;
+      overflow: hidden;
+    }
+
+    .app {
+      width: min(100%, 460px, calc((100dvh - 158px) * 0.6));
+      display: grid;
+      gap: 10px;
+    }
+
+    .hud {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: stretch;
+    }
+
+    .score-card,
+    .next-card {
+      min-height: 72px;
+      border: 1px solid rgba(255, 211, 106, 0.28);
+      border-radius: 8px;
+      background: linear-gradient(180deg, rgba(58, 42, 29, 0.94), rgba(36, 28, 21, 0.96));
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.26);
+    }
+
+    .score-card {
+      padding: 10px 12px;
+    }
+
+    .label {
+      color: var(--muted);
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+
+    .score {
+      display: block;
+      margin-top: 3px;
+      color: var(--gold);
+      font-size: clamp(1.8rem, 9vw, 2.7rem);
+      font-weight: 900;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .next-card {
+      width: 104px;
+      padding: 8px;
+      text-align: center;
+    }
+
+    .next-preview {
+      height: 42px;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      text-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
+    }
+
+    .field-shell {
+      position: relative;
+      overflow: hidden;
+      border: 2px solid rgba(255, 211, 106, 0.45);
+      border-radius: 8px;
+      background:
+        linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px) 0 0 / 36px 36px,
+        linear-gradient(180deg, #2a231c 0%, #17110d 100%);
+      box-shadow:
+        inset 0 0 0 5px rgba(36, 24, 14, 0.75),
+        0 18px 46px rgba(0, 0, 0, 0.36);
+      touch-action: none;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 360 / 600;
+      cursor: pointer;
+    }
+
+    .line-label {
+      position: absolute;
+      top: 78px;
+      left: 12px;
+      z-index: 2;
+      color: var(--danger);
+      font-size: 0.72rem;
+      font-weight: 800;
+      pointer-events: none;
+      text-shadow: 0 1px 2px #000;
+    }
+
+    .hold-meter {
+      position: absolute;
+      left: 14px;
+      right: 14px;
+      bottom: 14px;
+      height: 10px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.12);
+      opacity: 0;
+      transition: opacity 120ms ease;
+      pointer-events: none;
+    }
+
+    .hold-meter.is-visible {
+      opacity: 1;
+    }
+
+    .hold-meter > span {
+      display: block;
+      width: var(--hold, 0%);
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--gold));
+      transition: width 60ms linear;
+    }
+
+    .ready-badge {
+      position: absolute;
+      left: 50%;
+      top: 128px;
+      z-index: 3;
+      transform: translateX(-50%) scale(0.92);
+      padding: 6px 14px;
+      border: 1px solid rgba(134, 209, 255, 0.85);
+      border-radius: 999px;
+      background: rgba(13, 25, 38, 0.82);
+      color: #dff5ff;
+      font-size: 0.84rem;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 120ms ease, transform 120ms ease;
+    }
+
+    .ready-badge.is-visible {
+      opacity: 1;
+      transform: translateX(-50%) scale(1);
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: rgba(7, 5, 4, 0.72);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 160ms ease;
+    }
+
+    .overlay.is-visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .dialog {
+      width: min(100%, 280px);
+      padding: 20px;
+      border: 1px solid rgba(255, 211, 106, 0.45);
+      border-radius: 8px;
+      background: linear-gradient(180deg, #3a2a1d, #1e1712);
+      text-align: center;
+      box-shadow: 0 20px 48px rgba(0, 0, 0, 0.38);
+    }
+
+    .dialog h1 {
+      margin: 0 0 8px;
+      color: var(--danger);
+      font-size: 2rem;
+      line-height: 1;
+    }
+
+    .dialog p {
+      margin: 0 0 16px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    button {
+      width: 100%;
+      min-height: 44px;
+      border: 0;
+      border-radius: 8px;
+      background: linear-gradient(180deg, #ffe08a, #c8832d);
+      color: #241105;
+      font: inherit;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .help {
+      margin: 0;
+      color: rgba(255, 244, 216, 0.72);
+      font-size: 0.78rem;
+      line-height: 1.55;
+      text-align: center;
+    }
+
+    @media (min-width: 760px) {
+      body {
+        padding: 16px;
+      }
+
+      .app {
+        width: min(100%, 520px, calc((100dvh - 162px) * 0.6));
+      }
+
+      .next-card {
+        width: 124px;
+      }
+    }
+
+    @media (max-height: 720px) {
+      .app {
+        width: min(100%, 390px, calc((100dvh - 182px) * 0.6));
+        gap: 8px;
+      }
+
+      .score-card,
+      .next-card {
+        min-height: 54px;
+      }
+
+      .score {
+        font-size: 1.55rem;
+      }
+
+      .help {
+        font-size: 0.72rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app" aria-label="物理合体パズル">
+    <section class="hud" aria-label="スコアと次の果物">
+      <div class="score-card">
+        <span class="label">SCORE</span>
+        <span class="score" id="score">0</span>
+      </div>
+      <div class="next-card">
+        <span class="label">NEXT</span>
+        <div class="next-preview" id="nextPreview"></div>
+      </div>
+    </section>
+
+    <section class="field-shell" id="fieldShell">
+      <span class="line-label">GAME OVER LINE</span>
+      <canvas id="gameCanvas" width="360" height="600" aria-label="ゲームフィールド"></canvas>
+      <div class="ready-badge" id="readyBadge">READY</div>
+      <div class="hold-meter" id="holdMeter"><span></span></div>
+      <div class="overlay" id="gameOverOverlay">
+        <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="gameOverTitle">
+          <h1 id="gameOverTitle">GAME OVER</h1>
+          <p>FINAL SCORE <span id="finalScore">0</span></p>
+          <button type="button" id="restartButton">RESTART</button>
+        </div>
+      </div>
+    </section>
+
+    <p class="help">
+      左右に動かしてクリック/タップで落下。お邪魔キャラは長押し1秒で画面外へ飛ばせます。
+    </p>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/matter-js@0.20.0/build/matter.min.js"></script>
+  <script>
+    (() => {
+      "use strict";
+
+      const { Engine, Runner, Bodies, Body, Composite, Events } = Matter;
+
+      // ===== Constants: field, physics, score, timing =====
+      const CONFIG = {
+        fieldWidth: 360,
+        fieldHeight: 600,
+        wallThickness: 34,
+        spawnY: 52,
+        gameOverLineY: 92,
+        gameOverGraceMs: 1800,
+        mergeCooldownMs: 90,
+        holdChargeMs: 200,
+        holdReadyMs: 1000,
+        obstacleChance: 0.14,
+        gravityY: 1.08,
+        fruitRestitution: 0.18,
+        fruitFriction: 0.55,
+        fruitFrictionAir: 0.015,
+        obstacleHeavyDensity: 0.0048,
+        normalDensity: 0.001,
+        nextPoolCount: 5
+      };
+
+      // 画像に差し替える場合は image にURLを入れ、drawFruitBody/drawCurrentPieceで描画を切り替える。
+      const FRUITS = [
+        { id: "cherry", name: "さくらんぼ", radius: 14, score: 1, nextId: "strawberry", color: "#ef476f", text: "🍒", image: null },
+        { id: "strawberry", name: "いちご", radius: 18, score: 3, nextId: "grape", color: "#ff5a73", text: "🍓", image: null },
+        { id: "grape", name: "ぶどう", radius: 22, score: 6, nextId: "dekopon", color: "#8f6ad9", text: "🍇", image: null },
+        { id: "dekopon", name: "デコポン", radius: 27, score: 10, nextId: "persimmon", color: "#ff9f1c", text: "🍊", image: null },
+        { id: "persimmon", name: "柿", radius: 32, score: 15, nextId: "apple", color: "#f07c2f", text: "柿", image: null },
+        { id: "apple", name: "りんご", radius: 38, score: 21, nextId: "pear", color: "#e63946", text: "🍎", image: null },
+        { id: "pear", name: "梨", radius: 45, score: 28, nextId: "peach", color: "#c7df66", text: "梨", image: null },
+        { id: "peach", name: "桃", radius: 52, score: 36, nextId: "pineapple", color: "#ffb3c1", text: "🍑", image: null },
+        { id: "pineapple", name: "パイン", radius: 60, score: 45, nextId: "melon", color: "#f9c74f", text: "🍍", image: null },
+        { id: "melon", name: "メロン", radius: 69, score: 55, nextId: "watermelon", color: "#80b918", text: "🍈", image: null },
+        { id: "watermelon", name: "スイカ", radius: 80, score: 66, nextId: null, color: "#2f9e44", text: "🍉", image: null }
+      ];
+
+      const OBSTACLES = [
+        { id: "evil-a", name: "お邪魔A", radius: 23, color: "#7c4dff", text: "邪", image: null },
+        { id: "evil-b", name: "お邪魔B", radius: 23, color: "#00a6a6", text: "乱", image: null },
+        { id: "evil-c", name: "お邪魔C", radius: 23, color: "#a64d79", text: "重", image: null }
+      ];
+
+      const fruitById = new Map(FRUITS.map((fruit, index) => [fruit.id, { ...fruit, level: index }]));
+
+      // ===== DOM / canvas =====
+      const canvas = document.getElementById("gameCanvas");
+      const ctx = canvas.getContext("2d");
+      const shell = document.getElementById("fieldShell");
+      const scoreEl = document.getElementById("score");
+      const nextPreview = document.getElementById("nextPreview");
+      const overlay = document.getElementById("gameOverOverlay");
+      const finalScoreEl = document.getElementById("finalScore");
+      const restartButton = document.getElementById("restartButton");
+      const readyBadge = document.getElementById("readyBadge");
+      const holdMeter = document.getElementById("holdMeter");
+      const holdMeterBar = holdMeter.querySelector("span");
+
+      // ===== Game state =====
+      const state = {
+        engine: null,
+        runner: null,
+        score: 0,
+        current: null,
+        next: null,
+        pointerX: CONFIG.fieldWidth / 2,
+        isGameOver: false,
+        isPointerDown: false,
+        holdStartAt: 0,
+        holdProgress: 0,
+        overLineSince: null,
+        effects: [],
+        pendingMerges: new Set(),
+        rafId: 0,
+        lastDropAt: 0
+      };
+
+      // ===== Utility =====
+      const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+      const now = () => performance.now();
+      const randomItem = (items) => items[Math.floor(Math.random() * items.length)];
+      const nextFruitData = () => ({ type: "fruit", data: FRUITS[Math.floor(Math.random() * CONFIG.nextPoolCount)] });
+      const nextObstacleData = () => ({ type: "obstacle", data: randomItem(OBSTACLES) });
+      const randomDropData = () => Math.random() < CONFIG.obstacleChance ? nextObstacleData() : nextFruitData();
+
+      function setScore(value) {
+        state.score = value;
+        scoreEl.textContent = String(state.score);
+      }
+
+      function toFieldX(clientX) {
+        const rect = canvas.getBoundingClientRect();
+        return clamp((clientX - rect.left) * CONFIG.fieldWidth / rect.width, 0, CONFIG.fieldWidth);
+      }
+
+      function clampCurrentX(x) {
+        if (!state.current) return x;
+        const radius = state.current.data.radius;
+        return clamp(x, radius + 8, CONFIG.fieldWidth - radius - 8);
+      }
+
+      // ===== Physics management =====
+      function createEngine() {
+        const engine = Engine.create();
+        engine.gravity.y = CONFIG.gravityY;
+
+        const t = CONFIG.wallThickness;
+        const wallOptions = {
+          isStatic: true,
+          friction: 0.9,
+          restitution: 0.08,
+          render: { visible: false }
+        };
+
+        const leftWall = Bodies.rectangle(-t / 2, CONFIG.fieldHeight / 2, t, CONFIG.fieldHeight * 2, wallOptions);
+        const rightWall = Bodies.rectangle(CONFIG.fieldWidth + t / 2, CONFIG.fieldHeight / 2, t, CONFIG.fieldHeight * 2, wallOptions);
+        const floor = Bodies.rectangle(CONFIG.fieldWidth / 2, CONFIG.fieldHeight + t / 2, CONFIG.fieldWidth + t * 2, t, wallOptions);
+
+        Composite.add(engine.world, [leftWall, rightWall, floor]);
+        Events.on(engine, "collisionStart", handleCollisionStart);
+        return engine;
+      }
+
+      function createFruitBody(drop, x, y) {
+        const isObstacle = drop.type === "obstacle";
+        const data = drop.data;
+        const body = Bodies.circle(x, y, data.radius, {
+          restitution: CONFIG.fruitRestitution,
+          friction: CONFIG.fruitFriction,
+          frictionAir: CONFIG.fruitFrictionAir,
+          density: CONFIG.normalDensity,
+          label: isObstacle ? "obstacle" : "fruit"
+        });
+
+        body.plugin.kind = drop.type;
+        body.plugin.dataId = data.id;
+        body.plugin.level = isObstacle ? -1 : fruitById.get(data.id).level;
+        body.plugin.radius = data.radius;
+        body.plugin.spawnedAt = now();
+        body.plugin.isMerging = false;
+        body.plugin.isHeavy = false;
+        return body;
+      }
+
+      function addBody(body) {
+        Composite.add(state.engine.world, body);
+      }
+
+      function removeBodies(bodies) {
+        Composite.remove(state.engine.world, bodies);
+      }
+
+      function activeBodies() {
+        return Composite.allBodies(state.engine.world).filter((body) => body.plugin.kind === "fruit" || body.plugin.kind === "obstacle");
+      }
+
+      // ===== Fruit / obstacle management =====
+      function prepareQueue() {
+        state.current = state.next || randomDropData();
+        state.next = randomDropData();
+        state.pointerX = clampCurrentX(state.pointerX);
+        updateNextPreview();
+      }
+
+      function dropCurrent() {
+        if (state.isGameOver || !state.current) return;
+        state.lastDropAt = now();
+        const body = createFruitBody(state.current, clampCurrentX(state.pointerX), CONFIG.spawnY);
+        addBody(body);
+        state.current = null;
+        setTimeout(() => {
+          if (!state.isGameOver) prepareQueue();
+        }, 360);
+      }
+
+      function throwAwayCurrentObstacle() {
+        if (!state.current || state.current.type !== "obstacle") return;
+        state.lastDropAt = now();
+        state.effects.push({
+          type: "throw",
+          x: clampCurrentX(state.pointerX),
+          y: CONFIG.spawnY,
+          radius: state.current.data.radius,
+          data: state.current.data,
+          bornAt: now(),
+          life: 420
+        });
+        state.current = null;
+        setTimeout(() => {
+          if (!state.isGameOver) prepareQueue();
+        }, 180);
+      }
+
+      function maybeMakeObstacleHeavy() {
+        for (const body of activeBodies()) {
+          if (body.plugin.kind !== "obstacle" || body.plugin.isHeavy) continue;
+          const settledEnough = now() - body.plugin.spawnedAt > 850;
+          const nearBottomOrSlow = body.position.y > CONFIG.fieldHeight - 90 || Math.abs(body.velocity.y) < 0.16;
+          if (settledEnough && nearBottomOrSlow) {
+            body.plugin.isHeavy = true;
+            Body.setDensity(body, CONFIG.obstacleHeavyDensity);
+            Body.set(body, { friction: 0.95, frictionAir: 0.035 });
+          }
+        }
+      }
+
+      // ===== Merge management =====
+      function handleCollisionStart(event) {
+        if (state.isGameOver) return;
+
+        for (const pair of event.pairs) {
+          const a = pair.bodyA;
+          const b = pair.bodyB;
+          if (a.plugin.kind !== "fruit" || b.plugin.kind !== "fruit") continue;
+          if (a.plugin.isMerging || b.plugin.isMerging) continue;
+          if (a.plugin.level !== b.plugin.level) continue;
+
+          const key = [a.id, b.id].sort((x, y) => x - y).join(":");
+          if (state.pendingMerges.has(key)) continue;
+          state.pendingMerges.add(key);
+
+          setTimeout(() => {
+            state.pendingMerges.delete(key);
+            mergeBodies(a, b);
+          }, CONFIG.mergeCooldownMs);
+        }
+      }
+
+      function mergeBodies(a, b) {
+        if (state.isGameOver) return;
+        const bodies = activeBodies();
+        if (!bodies.includes(a) || !bodies.includes(b)) return;
+        if (a.plugin.isMerging || b.plugin.isMerging) return;
+
+        a.plugin.isMerging = true;
+        b.plugin.isMerging = true;
+
+        const fruit = FRUITS[a.plugin.level];
+        const x = (a.position.x + b.position.x) / 2;
+        const y = (a.position.y + b.position.y) / 2;
+        const velocity = {
+          x: (a.velocity.x + b.velocity.x) / 2,
+          y: (a.velocity.y + b.velocity.y) / 2
+        };
+
+        removeBodies([a, b]);
+        setScore(state.score + fruit.score);
+        createMergeEffect(x, y, fruit);
+
+        if (fruit.nextId) {
+          const nextData = fruitById.get(fruit.nextId);
+          const nextBody = createFruitBody({ type: "fruit", data: nextData }, x, y);
+          Body.setVelocity(nextBody, velocity);
+          Body.setAngularVelocity(nextBody, (a.angularVelocity + b.angularVelocity) / 2);
+          addBody(nextBody);
+        }
+      }
+
+      function createMergeEffect(x, y, fruit) {
+        state.effects.push({
+          type: "merge",
+          x,
+          y,
+          radius: fruit.radius,
+          color: fruit.color,
+          bornAt: now(),
+          life: 360,
+          particles: Array.from({ length: 9 }, (_, i) => ({
+            angle: (Math.PI * 2 * i) / 9,
+            speed: 1.8 + Math.random() * 2.2
+          }))
+        });
+      }
+
+      // ===== Game state management =====
+      function checkGameOver() {
+        if (state.isGameOver) return;
+
+        const hasBodyOverLine = activeBodies().some((body) => {
+          const radius = body.plugin.radius || 0;
+          const oldEnough = now() - body.plugin.spawnedAt > 900;
+          return oldEnough && body.position.y - radius < CONFIG.gameOverLineY;
+        });
+
+        if (hasBodyOverLine) {
+          state.overLineSince ??= now();
+          if (now() - state.overLineSince >= CONFIG.gameOverGraceMs) endGame();
+        } else {
+          state.overLineSince = null;
+        }
+      }
+
+      function endGame() {
+        state.isGameOver = true;
+        state.current = null;
+        Runner.stop(state.runner);
+        finalScoreEl.textContent = String(state.score);
+        overlay.classList.add("is-visible");
+        resetHoldUi();
+      }
+
+      function restartGame() {
+        cancelAnimationFrame(state.rafId);
+        if (state.runner) Runner.stop(state.runner);
+        if (state.engine) {
+          Events.off(state.engine, "collisionStart", handleCollisionStart);
+          Composite.clear(state.engine.world, false);
+          Engine.clear(state.engine);
+        }
+
+        state.engine = createEngine();
+        state.runner = Runner.create();
+        state.isGameOver = false;
+        state.current = null;
+        state.next = null;
+        state.pointerX = CONFIG.fieldWidth / 2;
+        state.overLineSince = null;
+        state.effects = [];
+        state.pendingMerges.clear();
+        setScore(0);
+        overlay.classList.remove("is-visible");
+        resetHoldUi();
+        prepareQueue();
+        Runner.run(state.runner, state.engine);
+        drawLoop();
+      }
+
+      // ===== UI management =====
+      function updateNextPreview() {
+        const drop = state.next;
+        if (!drop) {
+          nextPreview.textContent = "";
+          return;
+        }
+
+        const size = Math.max(24, Math.min(40, drop.data.radius * 1.3));
+        nextPreview.textContent = drop.data.text;
+        nextPreview.style.color = "#fff";
+        nextPreview.style.fontSize = `${drop.type === "obstacle" ? 24 : size}px`;
+        nextPreview.style.background = `radial-gradient(circle at 35% 30%, rgba(255,255,255,.45), ${drop.data.color} 62%, rgba(0,0,0,.28))`;
+        nextPreview.style.borderRadius = "999px";
+        nextPreview.style.width = `${size}px`;
+        nextPreview.style.margin = "5px auto 0";
+      }
+
+      function updateHoldUi() {
+        if (!state.isPointerDown || !state.current || state.current.type !== "obstacle") {
+          resetHoldUi();
+          return;
+        }
+
+        const elapsed = now() - state.holdStartAt;
+        state.holdProgress = clamp(elapsed / CONFIG.holdReadyMs, 0, 1);
+        holdMeter.classList.toggle("is-visible", elapsed >= CONFIG.holdChargeMs);
+        holdMeterBar.style.setProperty("--hold", `${Math.round(state.holdProgress * 100)}%`);
+        readyBadge.classList.toggle("is-visible", elapsed >= CONFIG.holdReadyMs);
+      }
+
+      function resetHoldUi() {
+        state.isPointerDown = false;
+        state.holdStartAt = 0;
+        state.holdProgress = 0;
+        holdMeter.classList.remove("is-visible");
+        readyBadge.classList.remove("is-visible");
+        holdMeterBar.style.setProperty("--hold", "0%");
+      }
+
+      // ===== Input management =====
+      function handlePointerMove(event) {
+        if (state.isGameOver) return;
+        state.pointerX = clampCurrentX(toFieldX(event.clientX));
+      }
+
+      function handlePointerDown(event) {
+        if (state.isGameOver || event.button > 0) return;
+        event.preventDefault();
+        shell.setPointerCapture?.(event.pointerId);
+        state.pointerX = clampCurrentX(toFieldX(event.clientX));
+        state.isPointerDown = true;
+        state.holdStartAt = now();
+      }
+
+      function handlePointerUp(event) {
+        if (state.isGameOver || !state.isPointerDown) return;
+        event.preventDefault();
+        state.pointerX = clampCurrentX(toFieldX(event.clientX));
+        const elapsed = now() - state.holdStartAt;
+        const current = state.current;
+        resetHoldUi();
+
+        if (!current) return;
+        if (current.type === "obstacle") {
+          if (elapsed < CONFIG.holdChargeMs) {
+            dropCurrent();
+          } else if (elapsed >= CONFIG.holdReadyMs) {
+            throwAwayCurrentObstacle();
+          }
+          return;
+        }
+
+        dropCurrent();
+      }
+
+      function handleClickFallback(event) {
+        if (state.isGameOver || !state.current) return;
+        if (now() - state.lastDropAt < 120) return;
+        state.pointerX = clampCurrentX(toFieldX(event.clientX));
+        dropCurrent();
+      }
+
+      function handleKeyDown(event) {
+        if (event.key !== " " && event.key !== "Enter") return;
+        if (state.isGameOver || !state.current) return;
+        event.preventDefault();
+        if (state.current.type === "obstacle" && event.shiftKey) {
+          throwAwayCurrentObstacle();
+          return;
+        }
+        dropCurrent();
+      }
+
+      shell.addEventListener("pointermove", handlePointerMove);
+      shell.addEventListener("pointerdown", handlePointerDown);
+      shell.addEventListener("pointerup", handlePointerUp);
+      shell.addEventListener("pointercancel", resetHoldUi);
+      shell.addEventListener("click", handleClickFallback);
+      window.addEventListener("keydown", handleKeyDown);
+      restartButton.addEventListener("click", restartGame);
+
+      // ===== Rendering =====
+      function resizeCanvasForDpr() {
+        const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+        canvas.width = Math.round(CONFIG.fieldWidth * dpr);
+        canvas.height = Math.round(CONFIG.fieldHeight * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      function drawLoop() {
+        resizeCanvasForDpr();
+        maybeMakeObstacleHeavy();
+        checkGameOver();
+        updateHoldUi();
+        drawScene();
+        if (!state.isGameOver) state.rafId = requestAnimationFrame(drawLoop);
+      }
+
+      function drawScene() {
+        ctx.clearRect(0, 0, CONFIG.fieldWidth, CONFIG.fieldHeight);
+        drawField();
+
+        for (const body of activeBodies()) {
+          if (body.plugin.kind === "fruit") drawFruitBody(body);
+          if (body.plugin.kind === "obstacle") drawObstacleBody(body);
+        }
+
+        if (state.current && !state.isGameOver) drawCurrentPiece();
+        drawEffects();
+      }
+
+      function drawField() {
+        ctx.save();
+        ctx.strokeStyle = "rgba(255, 110, 114, 0.9)";
+        ctx.lineWidth = 2;
+        ctx.setLineDash([8, 8]);
+        ctx.beginPath();
+        ctx.moveTo(0, CONFIG.gameOverLineY);
+        ctx.lineTo(CONFIG.fieldWidth, CONFIG.gameOverLineY);
+        ctx.stroke();
+        ctx.restore();
+
+        ctx.fillStyle = "rgba(255, 211, 106, 0.12)";
+        ctx.fillRect(0, CONFIG.fieldHeight - 8, CONFIG.fieldWidth, 8);
+      }
+
+      function drawBall(x, y, radius, rotation, data, options = {}) {
+        const pulse = options.pulse || 1;
+        const r = radius * pulse;
+
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(rotation || 0);
+
+        ctx.beginPath();
+        ctx.arc(0, 0, r, 0, Math.PI * 2);
+        ctx.fillStyle = data.color;
+        ctx.fill();
+
+        const gradient = ctx.createRadialGradient(-r * 0.35, -r * 0.35, r * 0.05, 0, 0, r);
+        gradient.addColorStop(0, "rgba(255,255,255,0.55)");
+        gradient.addColorStop(0.55, "rgba(255,255,255,0.03)");
+        gradient.addColorStop(1, "rgba(0,0,0,0.28)");
+        ctx.fillStyle = gradient;
+        ctx.fill();
+
+        ctx.lineWidth = Math.max(2, r * 0.08);
+        ctx.strokeStyle = options.outline || "rgba(255,255,255,0.35)";
+        ctx.stroke();
+
+        ctx.rotate(-(rotation || 0));
+        ctx.fillStyle = "#fff9ec";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.font = `900 ${Math.max(12, r * 0.75)}px system-ui, sans-serif`;
+        ctx.fillText(data.text, 0, 1);
+        ctx.restore();
+      }
+
+      function drawFruitBody(body) {
+        const data = FRUITS[body.plugin.level];
+        drawBall(body.position.x, body.position.y, data.radius, body.angle, data);
+      }
+
+      function drawObstacleBody(body) {
+        const data = OBSTACLES.find((item) => item.id === body.plugin.dataId) || OBSTACLES[0];
+        drawBall(body.position.x, body.position.y, data.radius, body.angle, data, {
+          outline: body.plugin.isHeavy ? "rgba(255, 211, 106, 0.9)" : "rgba(255,255,255,0.38)"
+        });
+
+        if (body.plugin.isHeavy) {
+          ctx.save();
+          ctx.globalAlpha = 0.7;
+          ctx.strokeStyle = "#ffd36a";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(body.position.x, body.position.y, data.radius + 5, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+
+      function drawCurrentPiece() {
+        const data = state.current.data;
+        const x = clampCurrentX(state.pointerX);
+        const y = CONFIG.spawnY;
+        const isReady = state.current.type === "obstacle" && state.holdProgress >= 1;
+        const pulse = isReady ? 1.12 + Math.sin(now() / 60) * 0.04 : 1;
+
+        ctx.save();
+        ctx.globalAlpha = 0.92;
+        drawBall(x, y, data.radius, 0, data, {
+          pulse,
+          outline: isReady ? "#86d1ff" : "rgba(255,255,255,0.62)"
+        });
+
+        ctx.strokeStyle = "rgba(255,255,255,0.18)";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(x, y + data.radius + 8);
+        ctx.lineTo(x, CONFIG.fieldHeight - 10);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      function drawEffects() {
+        const t = now();
+        state.effects = state.effects.filter((effect) => t - effect.bornAt < effect.life);
+
+        for (const effect of state.effects) {
+          const p = clamp((t - effect.bornAt) / effect.life, 0, 1);
+          if (effect.type === "merge") {
+            ctx.save();
+            ctx.globalAlpha = 1 - p;
+            ctx.strokeStyle = effect.color;
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.arc(effect.x, effect.y, effect.radius * (0.8 + p * 0.9), 0, Math.PI * 2);
+            ctx.stroke();
+
+            ctx.fillStyle = effect.color;
+            for (const particle of effect.particles) {
+              const distance = particle.speed * p * 28;
+              ctx.beginPath();
+              ctx.arc(
+                effect.x + Math.cos(particle.angle) * distance,
+                effect.y + Math.sin(particle.angle) * distance,
+                3 * (1 - p),
+                0,
+                Math.PI * 2
+              );
+              ctx.fill();
+            }
+            ctx.restore();
+          }
+
+          if (effect.type === "throw") {
+            ctx.save();
+            ctx.globalAlpha = 1 - p;
+            drawBall(effect.x + p * 260, effect.y - p * 120, effect.radius, p * 8, effect.data, { pulse: 1 - p * 0.35 });
+            ctx.restore();
+          }
+        }
+      }
+
+      window.addEventListener("resize", resizeCanvasForDpr);
+      restartGame();
+    })();
+  </script>
+</body>
+</html>
