@@ -70,6 +70,13 @@
       padding: 10px 12px;
     }
 
+    .score-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: end;
+    }
+
     .label {
       color: var(--muted);
       font-size: 0.74rem;
@@ -82,6 +89,25 @@
       margin-top: 3px;
       color: var(--gold);
       font-size: clamp(1.8rem, 9vw, 2.7rem);
+      font-weight: 900;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .best-box {
+      min-width: 76px;
+      padding: 6px 8px;
+      border: 1px solid rgba(134, 209, 255, 0.28);
+      border-radius: 8px;
+      background: rgba(9, 19, 28, 0.34);
+      text-align: right;
+    }
+
+    .best-score {
+      display: block;
+      margin-top: 2px;
+      color: #bfeeff;
+      font-size: clamp(1rem, 4.2vw, 1.3rem);
       font-weight: 900;
       line-height: 1;
       font-variant-numeric: tabular-nums;
@@ -104,13 +130,12 @@
     .field-shell {
       position: relative;
       overflow: hidden;
-      border: 2px solid rgba(255, 211, 106, 0.45);
+      border: 0;
       border-radius: 8px;
       background:
         linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px) 0 0 / 36px 36px,
         linear-gradient(180deg, #2a231c 0%, #17110d 100%);
       box-shadow:
-        inset 0 0 0 5px rgba(36, 24, 14, 0.75),
         0 18px 46px rgba(0, 0, 0, 0.36);
       touch-action: none;
     }
@@ -125,7 +150,7 @@
 
     .line-label {
       position: absolute;
-      top: 78px;
+      top: 20.333%;
       left: 12px;
       z-index: 2;
       color: var(--danger);
@@ -275,9 +300,15 @@
         font-size: 1.55rem;
       }
 
+      .best-box {
+        min-width: 64px;
+        padding: 5px 7px;
+      }
+
       .help {
         font-size: 0.72rem;
       }
+
     }
   </style>
 </head>
@@ -285,8 +316,16 @@
   <main class="app" aria-label="物理合体パズル">
     <section class="hud" aria-label="スコアと次の果物">
       <div class="score-card">
-        <span class="label">SCORE</span>
-        <span class="score" id="score">0</span>
+        <div class="score-row">
+          <div>
+            <span class="label">SCORE</span>
+            <span class="score" id="score">0</span>
+          </div>
+          <div class="best-box">
+            <span class="label">BEST</span>
+            <span class="best-score" id="bestScore">0</span>
+          </div>
+        </div>
       </div>
       <div class="next-card">
         <span class="label">NEXT</span>
@@ -326,7 +365,7 @@
         fieldHeight: 600,
         wallThickness: 34,
         spawnY: 52,
-        gameOverLineY: 92,
+        gameOverLineY: 152,
         gameOverGraceMs: 1800,
         mergeCooldownMs: 90,
         holdChargeMs: 200,
@@ -338,28 +377,29 @@
         fruitFrictionAir: 0.015,
         obstacleHeavyDensity: 0.0048,
         normalDensity: 0.001,
-        nextPoolCount: 5
+        nextPoolCount: 5,
+        debugMode: true
       };
 
       // 画像に差し替える場合は image にURLを入れ、drawFruitBody/drawCurrentPieceで描画を切り替える。
       const FRUITS = [
-        { id: "cherry", name: "さくらんぼ", radius: 14, score: 1, nextId: "strawberry", color: "#ef476f", text: "🍒", image: null },
-        { id: "strawberry", name: "いちご", radius: 18, score: 3, nextId: "grape", color: "#ff5a73", text: "🍓", image: null },
-        { id: "grape", name: "ぶどう", radius: 22, score: 6, nextId: "dekopon", color: "#8f6ad9", text: "🍇", image: null },
-        { id: "dekopon", name: "デコポン", radius: 27, score: 10, nextId: "persimmon", color: "#ff9f1c", text: "🍊", image: null },
-        { id: "persimmon", name: "柿", radius: 32, score: 15, nextId: "apple", color: "#f07c2f", text: "柿", image: null },
-        { id: "apple", name: "りんご", radius: 38, score: 21, nextId: "pear", color: "#e63946", text: "🍎", image: null },
-        { id: "pear", name: "梨", radius: 45, score: 28, nextId: "peach", color: "#c7df66", text: "梨", image: null },
-        { id: "peach", name: "桃", radius: 52, score: 36, nextId: "pineapple", color: "#ffb3c1", text: "🍑", image: null },
-        { id: "pineapple", name: "パイン", radius: 60, score: 45, nextId: "melon", color: "#f9c74f", text: "🍍", image: null },
-        { id: "melon", name: "メロン", radius: 69, score: 55, nextId: "watermelon", color: "#80b918", text: "🍈", image: null },
-        { id: "watermelon", name: "スイカ", radius: 80, score: 66, nextId: null, color: "#2f9e44", text: "🍉", image: null }
+        { id: "cherry", name: "さくらんぼ", radius: 11.5, score: 1, nextId: "strawberry", color: "#ef476f", text: "🍒", image: null },
+        { id: "strawberry", name: "いちご", radius: 15, score: 3, nextId: "grape", color: "#ff5a73", text: "🍓", image: null },
+        { id: "grape", name: "ぶどう", radius: 23, score: 6, nextId: "dekopon", color: "#8f6ad9", text: "🍇", image: null },
+        { id: "dekopon", name: "デコポン", radius: 26.5, score: 10, nextId: "persimmon", color: "#ff9f1c", text: "🍊", image: null },
+        { id: "persimmon", name: "柿", radius: 33.5, score: 15, nextId: "apple", color: "#f07c2f", text: "柿", image: null },
+        { id: "apple", name: "りんご", radius: 42, score: 21, nextId: "pear", color: "#e63946", text: "🍎", image: null },
+        { id: "pear", name: "梨", radius: 50, score: 28, nextId: "peach", color: "#c7df66", text: "梨", image: null },
+        { id: "peach", name: "桃", radius: 60, score: 36, nextId: "pineapple", color: "#ffb3c1", text: "🍑", image: null },
+        { id: "pineapple", name: "パイン", radius: 70, score: 45, nextId: "melon", color: "#f9c74f", text: "🍍", image: null },
+        { id: "melon", name: "メロン", radius: 85, score: 55, nextId: "watermelon", color: "#80b918", text: "🍈", image: null },
+        { id: "watermelon", name: "スイカ", radius: 100, score: 66, nextId: null, color: "#2f9e44", text: "🍉", image: null }
       ];
 
       const OBSTACLES = [
-        { id: "evil-a", name: "お邪魔A", radius: 23, color: "#7c4dff", text: "邪", image: null },
-        { id: "evil-b", name: "お邪魔B", radius: 23, color: "#00a6a6", text: "乱", image: null },
-        { id: "evil-c", name: "お邪魔C", radius: 23, color: "#a64d79", text: "重", image: null }
+        { id: "evil-a", name: "お邪魔A", radius: 23, density: 0.0050, heavyDensity: 0.0100, color: "#7c4dff", text: "邪", image: null },
+        { id: "evil-b", name: "お邪魔B", radius: 33.5, density: 0.0050, heavyDensity: 0.0100, color: "#00a6a6", text: "乱", image: null },
+        { id: "evil-c", name: "お邪魔C", radius: 50, density: 0.0050, heavyDensity: 0.0100, color: "#a64d79", text: "重", image: null }
       ];
 
       const fruitById = new Map(FRUITS.map((fruit, index) => [fruit.id, { ...fruit, level: index }]));
@@ -369,6 +409,7 @@
       const ctx = canvas.getContext("2d");
       const shell = document.getElementById("fieldShell");
       const scoreEl = document.getElementById("score");
+      const bestScoreEl = document.getElementById("bestScore");
       const nextPreview = document.getElementById("nextPreview");
       const overlay = document.getElementById("gameOverOverlay");
       const finalScoreEl = document.getElementById("finalScore");
@@ -382,6 +423,7 @@
         engine: null,
         runner: null,
         score: 0,
+        bestScore: 0,
         current: null,
         next: null,
         pointerX: CONFIG.fieldWidth / 2,
@@ -403,10 +445,28 @@
       const nextFruitData = () => ({ type: "fruit", data: FRUITS[Math.floor(Math.random() * CONFIG.nextPoolCount)] });
       const nextObstacleData = () => ({ type: "obstacle", data: randomItem(OBSTACLES) });
       const randomDropData = () => Math.random() < CONFIG.obstacleChance ? nextObstacleData() : nextFruitData();
+      const BEST_SCORE_KEY = "evileye-momon-best-score";
 
       function setScore(value) {
         state.score = value;
         scoreEl.textContent = String(state.score);
+        updateBestScore(state.score);
+      }
+
+      function readBestScore() {
+        const saved = Number(localStorage.getItem(BEST_SCORE_KEY));
+        return Number.isFinite(saved) && saved > 0 ? Math.floor(saved) : 0;
+      }
+
+      function setBestScore(value) {
+        state.bestScore = value;
+        bestScoreEl.textContent = String(state.bestScore);
+      }
+
+      function updateBestScore(score) {
+        if (score <= state.bestScore) return;
+        setBestScore(score);
+        localStorage.setItem(BEST_SCORE_KEY, String(score));
       }
 
       function toFieldX(clientX) {
@@ -433,8 +493,10 @@
           render: { visible: false }
         };
 
-        const leftWall = Bodies.rectangle(-t / 2, CONFIG.fieldHeight / 2, t, CONFIG.fieldHeight * 2, wallOptions);
-        const rightWall = Bodies.rectangle(CONFIG.fieldWidth + t / 2, CONFIG.fieldHeight / 2, t, CONFIG.fieldHeight * 2, wallOptions);
+        const playableHeight = CONFIG.fieldHeight - CONFIG.gameOverLineY;
+        const wallY = CONFIG.gameOverLineY + playableHeight / 2;
+        const leftWall = Bodies.rectangle(-t / 2, wallY, t, playableHeight, wallOptions);
+        const rightWall = Bodies.rectangle(CONFIG.fieldWidth + t / 2, wallY, t, playableHeight, wallOptions);
         const floor = Bodies.rectangle(CONFIG.fieldWidth / 2, CONFIG.fieldHeight + t / 2, CONFIG.fieldWidth + t * 2, t, wallOptions);
 
         Composite.add(engine.world, [leftWall, rightWall, floor]);
@@ -449,7 +511,7 @@
           restitution: CONFIG.fruitRestitution,
           friction: CONFIG.fruitFriction,
           frictionAir: CONFIG.fruitFrictionAir,
-          density: CONFIG.normalDensity,
+          density: isObstacle ? data.density : CONFIG.normalDensity,
           label: isObstacle ? "obstacle" : "fruit"
         });
 
@@ -481,6 +543,36 @@
         state.next = randomDropData();
         state.pointerX = clampCurrentX(state.pointerX);
         updateNextPreview();
+      }
+
+      function changeCurrentFruitForDebug(direction) {
+        if (!CONFIG.debugMode || state.isGameOver || !state.current) return;
+
+        const currentLevel = state.current.type === "fruit"
+          ? fruitById.get(state.current.data.id).level
+          : 0;
+        const nextLevel = (currentLevel + direction + FRUITS.length) % FRUITS.length;
+        state.current = {
+          type: "fruit",
+          data: FRUITS[nextLevel]
+        };
+        state.pointerX = clampCurrentX(state.pointerX);
+        resetHoldUi();
+      }
+
+      function changeCurrentObstacleForDebug() {
+        if (!CONFIG.debugMode || state.isGameOver || !state.current) return;
+
+        const currentIndex = state.current.type === "obstacle"
+          ? OBSTACLES.findIndex((obstacle) => obstacle.id === state.current.data.id)
+          : -1;
+        const nextIndex = (currentIndex + 1 + OBSTACLES.length) % OBSTACLES.length;
+        state.current = {
+          type: "obstacle",
+          data: OBSTACLES[nextIndex]
+        };
+        state.pointerX = clampCurrentX(state.pointerX);
+        resetHoldUi();
       }
 
       function dropCurrent() {
@@ -518,8 +610,9 @@
           const settledEnough = now() - body.plugin.spawnedAt > 850;
           const nearBottomOrSlow = body.position.y > CONFIG.fieldHeight - 90 || Math.abs(body.velocity.y) < 0.16;
           if (settledEnough && nearBottomOrSlow) {
+            const data = OBSTACLES.find((item) => item.id === body.plugin.dataId) || OBSTACLES[0];
             body.plugin.isHeavy = true;
-            Body.setDensity(body, CONFIG.obstacleHeavyDensity);
+            Body.setDensity(body, data.heavyDensity);
             Body.set(body, { friction: 0.95, frictionAir: 0.035 });
           }
         }
@@ -638,6 +731,7 @@
         state.overLineSince = null;
         state.effects = [];
         state.pendingMerges.clear();
+        setBestScore(readBestScore());
         setScore(0);
         overlay.classList.remove("is-visible");
         resetHoldUi();
@@ -730,6 +824,18 @@
       }
 
       function handleKeyDown(event) {
+        if (CONFIG.debugMode && (event.key === "1" || event.key === "2")) {
+          event.preventDefault();
+          changeCurrentFruitForDebug(event.key === "1" ? -1 : 1);
+          return;
+        }
+
+        if (CONFIG.debugMode && event.key === "3") {
+          event.preventDefault();
+          changeCurrentObstacleForDebug();
+          return;
+        }
+
         if (event.key !== " " && event.key !== "Enter") return;
         if (state.isGameOver || !state.current) return;
         event.preventDefault();
@@ -746,7 +852,11 @@
       shell.addEventListener("pointercancel", resetHoldUi);
       shell.addEventListener("click", handleClickFallback);
       window.addEventListener("keydown", handleKeyDown);
-      restartButton.addEventListener("click", restartGame);
+      restartButton.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        restartGame();
+      });
 
       // ===== Rendering =====
       function resizeCanvasForDpr() {
@@ -780,12 +890,25 @@
 
       function drawField() {
         ctx.save();
-        ctx.strokeStyle = "rgba(255, 110, 114, 0.9)";
+        ctx.strokeStyle = "rgba(255, 110, 114, 0.95)";
         ctx.lineWidth = 2;
         ctx.setLineDash([8, 8]);
         ctx.beginPath();
         ctx.moveTo(0, CONFIG.gameOverLineY);
         ctx.lineTo(CONFIG.fieldWidth, CONFIG.gameOverLineY);
+        ctx.stroke();
+        ctx.restore();
+
+        ctx.save();
+        ctx.strokeStyle = "rgba(255, 211, 106, 0.45)";
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(2, CONFIG.gameOverLineY);
+        ctx.lineTo(2, CONFIG.fieldHeight);
+        ctx.moveTo(CONFIG.fieldWidth - 2, CONFIG.gameOverLineY);
+        ctx.lineTo(CONFIG.fieldWidth - 2, CONFIG.fieldHeight);
+        ctx.moveTo(0, CONFIG.fieldHeight - 2);
+        ctx.lineTo(CONFIG.fieldWidth, CONFIG.fieldHeight - 2);
         ctx.stroke();
         ctx.restore();
 
