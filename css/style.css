@@ -56,7 +56,7 @@ button {
   overflow: hidden;
   background:
     linear-gradient(180deg, rgba(0, 0, 0, 0.18), transparent 18%, transparent 78%, rgba(0, 0, 0, 0.28)),
-    url("../assets/img/ui/background_sp.png") center top / cover no-repeat;
+    url("../assets/img/ui/background_sp_1.png") center top / cover no-repeat;
 }
 
 .site-header {
@@ -152,13 +152,14 @@ p {
 .featured-shelf {
   position: absolute;
   z-index: 1;
-  top: 18.7%;
-  left: 10.8%;
+  top: 15.5%;
+  left: 14.2%;
   display: flex;
   align-items: end;
-  gap: 3.2%;
-  width: 55%;
-  height: 15.2%;
+  justify-content: space-between;
+  gap: 0;
+  width: 58.8%;
+  height: 11.8%;
   overflow-x: auto;
   padding: 0;
   scroll-snap-type: x proximity;
@@ -173,11 +174,11 @@ p {
 .magic-book {
   position: relative;
   flex: 0 0 auto;
-  width: min(18vw, 5.2rem);
+  width: 23.2%;
   height: 100%;
   padding: 0;
   cursor: pointer;
-  background: url("../assets/img/books/book.png") center / contain no-repeat;
+  background: url("../assets/img/books/book_side_0.png") center / contain no-repeat;
   border: 0;
   border-radius: 0;
   box-shadow: 0 0.55rem 0.9rem rgba(0, 0, 0, 0.5);
@@ -186,22 +187,22 @@ p {
 
 .magic-book.red,
 .modal-book.red {
-  background-image: url("../assets/img/books/book.png");
+  background-image: url("../assets/img/books/book_side_0.png");
 }
 
 .magic-book.blue,
 .modal-book.blue {
-  background-image: url("../assets/img/books/book.png");
+  background-image: url("../assets/img/books/book_side_0.png");
 }
 
 .magic-book.green,
 .modal-book.green {
-  background-image: url("../assets/img/books/book.png");
+  background-image: url("../assets/img/books/book_side_0.png");
 }
 
 .magic-book.purple,
 .modal-book.purple {
-  background-image: url("../assets/img/books/book.png");
+  background-image: url("../assets/img/books/book_side_0.png");
 }
 
 .book-gem {
@@ -213,14 +214,7 @@ p {
 }
 
 .book-number {
-  position: absolute;
-  right: 0;
-  bottom: 10%;
-  left: 0;
-  color: var(--gold-bright);
-  font-size: clamp(0.75rem, 3vw, 1.05rem);
-  font-weight: 700;
-  text-align: center;
+  display: none;
 }
 
 .magic-book:hover,
@@ -437,16 +431,24 @@ p {
 
 @media (min-width: 760px) {
   .site-shell {
-    width: min(100%, 1145px);
+    width: min(100%, calc(100vh * 941 / 1672));
     min-height: 100vh;
-    background-image:
+    background:
       linear-gradient(180deg, rgba(0, 0, 0, 0.14), transparent 18%, transparent 78%, rgba(0, 0, 0, 0.24)),
-      url("../assets/img/ui/background_pc.png");
+      url("../assets/img/ui/background_sp_1.png") center top / 100% 100% no-repeat;
   }
 
   .site-header {
-    grid-template-columns: 7rem 1fr 5rem;
-    padding-inline: 2rem;
+    grid-template-columns: 4rem 1fr 3.75rem;
+    padding-inline: 0.8rem;
+  }
+
+  .site-header h1 {
+    font-size: 2.35rem;
+  }
+
+  .subtitle {
+    font-size: 1.15rem;
   }
 
   .banner-mark {
@@ -473,16 +475,16 @@ p {
   }
 
   .featured-shelf {
-    top: 29.5%;
-    left: 25.1%;
-    justify-content: flex-start;
+    top: 15.5%;
+    left: 14.2%;
     overflow: visible;
-    width: 38.8%;
-    height: 18.5%;
+    justify-content: space-between;
+    width: 58.8%;
+    height: 11.8%;
   }
 
   .magic-book {
-    width: min(7vw, 4.6rem);
+    width: 23.2%;
     height: 100%;
   }
 
@@ -499,26 +501,26 @@ p {
   }
 
   .reception {
-    right: 13.5%;
-    bottom: 14.3%;
-    left: 13.5%;
+    right: 3.8%;
+    bottom: 12.7%;
+    left: 3.8%;
     min-height: 0;
     margin-top: 0;
   }
 
   .speech {
-    width: min(24rem, 42%);
-    margin-left: 13%;
+    width: min(22rem, 74%);
+    margin-left: 0.15rem;
   }
 
   .site-footer {
-    grid-template-columns: 1fr auto;
-    align-items: center;
-    padding-inline: 2rem;
+    grid-template-columns: 1fr;
+    align-items: stretch;
+    padding-inline: 0.75rem;
   }
 
   .footer-actions {
-    min-width: 22rem;
+    min-width: 0;
   }
 
   .game-modal {
