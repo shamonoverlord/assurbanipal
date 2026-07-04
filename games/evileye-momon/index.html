@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="ja">
 <head>
   <meta charset="utf-8">
@@ -26,11 +26,12 @@
       margin: 0;
       min-height: 100%;
       background:
-        radial-gradient(circle at top left, rgba(134, 209, 255, 0.18), transparent 32rem),
-        linear-gradient(180deg, #201912 0%, #0f0c09 100%);
+        linear-gradient(rgba(5, 8, 12, 0.12), rgba(5, 8, 12, 0.24)),
+        url("assets/img/ui/background.png") center top / auto 100dvh no-repeat;
+      background-color: #0f0c09;
       color: var(--ink);
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      overflow-x: hidden;
+      overflow: hidden;
       touch-action: manipulation;
       user-select: none;
     }
@@ -52,95 +53,139 @@
 
     .hud {
       display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 10px;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 74px;
+      gap: 8px;
       align-items: stretch;
+    }
+
+    .hud-wrap {
+      display: grid;
+      gap: 6px;
     }
 
     .score-card,
     .next-card {
-      min-height: 72px;
-      border: 1px solid rgba(255, 211, 106, 0.28);
-      border-radius: 8px;
-      background: linear-gradient(180deg, rgba(58, 42, 29, 0.94), rgba(36, 28, 21, 0.96));
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.26);
+      position: relative;
+      display: grid;
+      align-content: center;
+      border: 0;
+      border-radius: 0;
+      background-color: rgba(24, 28, 30, 0.96);
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: 100% 100%;
+      box-shadow: none;
     }
 
     .score-card {
-      padding: 10px 12px;
-    }
-
-    .score-row {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 10px;
-      align-items: end;
+      min-height: 52px;
+      padding: 7px 12px 8px;
+      background-image: url("assets/img/ui/score.png");
     }
 
     .label {
       color: var(--muted);
-      font-size: 0.74rem;
+      font-size: 0.64rem;
       font-weight: 700;
       letter-spacing: 0.08em;
     }
 
-    .score {
-      display: block;
-      margin-top: 3px;
-      color: var(--gold);
-      font-size: clamp(1.8rem, 9vw, 2.7rem);
-      font-weight: 900;
-      line-height: 1;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .best-box {
-      min-width: 76px;
-      padding: 6px 8px;
-      border: 1px solid rgba(134, 209, 255, 0.28);
-      border-radius: 8px;
-      background: rgba(9, 19, 28, 0.34);
-      text-align: right;
-    }
-
+    .score,
     .best-score {
       display: block;
       margin-top: 2px;
-      color: #bfeeff;
-      font-size: clamp(1rem, 4.2vw, 1.3rem);
+      color: var(--gold);
+      font-size: clamp(1.15rem, 5vw, 1.8rem);
       font-weight: 900;
       line-height: 1;
       font-variant-numeric: tabular-nums;
     }
 
+    .best-score {
+      color: #bfeeff;
+    }
+
     .next-card {
-      width: 104px;
+      width: 74px;
+      min-height: 74px;
       padding: 8px;
+      background-image: url("assets/img/ui/next.png");
       text-align: center;
     }
 
     .next-preview {
-      height: 42px;
+      position: relative;
+      height: 44px;
       display: grid;
       place-items: center;
       font-weight: 900;
       text-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
     }
 
+    .next-preview.is-obstacle-preview::before {
+      content: "";
+      position: absolute;
+      inset: -5px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 45, 55, 0.75);
+      background: radial-gradient(circle, rgba(255, 25, 38, 0.28), rgba(255, 25, 38, 0) 68%);
+      box-shadow:
+        0 0 12px rgba(255, 38, 52, 0.72),
+        inset 0 0 9px rgba(255, 38, 52, 0.42);
+      animation: obstaclePulse 900ms ease-in-out infinite alternate;
+      pointer-events: none;
+    }
+
+    .next-preview.is-obstacle-preview {
+      filter: drop-shadow(0 0 7px rgba(255, 35, 45, 0.7));
+    }
+
+    @keyframes obstaclePulse {
+      from {
+        opacity: 0.5;
+        transform: scale(0.92) rotate(0deg);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1.12) rotate(10deg);
+      }
+    }
+
     .field-shell {
       position: relative;
-      overflow: hidden;
+      overflow: visible;
       border: 0;
       border-radius: 8px;
-      background:
-        linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px) 0 0 / 36px 36px,
-        linear-gradient(180deg, #2a231c 0%, #17110d 100%);
-      box-shadow:
-        0 18px 46px rgba(0, 0, 0, 0.36);
+      background: transparent;
+      box-shadow: none;
       touch-action: none;
     }
 
+    .field-shell::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      background: transparent;
+      pointer-events: none;
+    }
+
+    .puzzle-frame {
+      position: absolute;
+      left: 50%;
+      top: calc(25.333% - 20px);
+      width: min(100vw, calc(100dvh * 0.5625));
+      aspect-ratio: 45 / 56;
+      z-index: 0;
+      background: url("assets/img/ui/pazzlearea.png") center / 100% 100% no-repeat;
+      pointer-events: none;
+      transform: translateX(-50%);
+    }
+
     canvas {
+      position: relative;
+      z-index: 1;
       display: block;
       width: 100%;
       height: auto;
@@ -150,25 +195,23 @@
 
     .line-label {
       position: absolute;
-      top: 20.333%;
+      top: 23.667%;
       left: 12px;
       z-index: 2;
       color: var(--danger);
-      font-size: 0.72rem;
+      font-size: 0.84rem;
       font-weight: 800;
       pointer-events: none;
       text-shadow: 0 1px 2px #000;
     }
 
     .hold-meter {
-      position: absolute;
-      left: 14px;
-      right: 14px;
-      bottom: 14px;
-      height: 10px;
-      overflow: hidden;
+      position: relative;
+      width: min(62%, 220px);
+      height: 24px;
+      justify-self: center;
+      overflow: visible;
       border-radius: 999px;
-      background: rgba(255, 255, 255, 0.12);
       opacity: 0;
       transition: opacity 120ms ease;
       pointer-events: none;
@@ -181,33 +224,59 @@
     .hold-meter > span {
       display: block;
       width: var(--hold, 0%);
-      height: 100%;
-      background: linear-gradient(90deg, var(--accent), var(--gold));
+      height: 6px;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #ff3b45, #ff9c42);
+      box-shadow: 0 0 8px rgba(255, 55, 65, 0.72);
       transition: width 60ms linear;
+    }
+
+    .hold-meter::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.14);
+      z-index: -1;
     }
 
     .ready-badge {
       position: absolute;
-      left: 50%;
-      top: 128px;
+      left: calc(50% + min(31%, 110px) + 60px);
+      top: 8px;
       z-index: 3;
-      transform: translateX(-50%) scale(0.92);
-      padding: 6px 14px;
-      border: 1px solid rgba(134, 209, 255, 0.85);
-      border-radius: 999px;
-      background: rgba(13, 25, 38, 0.82);
-      color: #dff5ff;
-      font-size: 0.84rem;
+      transform: translateX(-100%) scale(0.82);
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: #ffdf55;
+      font-size: 0.9rem;
       font-weight: 900;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.06em;
       opacity: 0;
       pointer-events: none;
-      transition: opacity 120ms ease, transform 120ms ease;
+      text-shadow:
+        0 0 5px rgba(255, 54, 64, 0.95),
+        0 1px 2px #000;
+      transition: opacity 80ms ease;
     }
 
     .ready-badge.is-visible {
       opacity: 1;
-      transform: translateX(-50%) scale(1);
+      animation: kickReadyPulse 420ms ease-in-out infinite alternate;
+    }
+
+    @keyframes kickReadyPulse {
+      from {
+        transform: translateX(-100%) scale(0.92);
+      }
+
+      to {
+        transform: translateX(-100%) scale(1.18);
+      }
     }
 
     .overlay {
@@ -263,25 +332,18 @@
       cursor: pointer;
     }
 
-    .help {
-      margin: 0;
-      color: rgba(255, 244, 216, 0.72);
-      font-size: 0.78rem;
-      line-height: 1.55;
-      text-align: center;
-    }
-
     @media (min-width: 760px) {
       body {
         padding: 16px;
       }
 
       .app {
-        width: min(100%, 520px, calc((100dvh - 162px) * 0.6));
+        width: min(100%, 520px, calc((100dvh - 160px) * 0.6));
       }
 
       .next-card {
-        width: 124px;
+        width: 80px;
+        min-height: 80px;
       }
     }
 
@@ -291,22 +353,25 @@
         gap: 8px;
       }
 
-      .score-card,
+      .hud {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 64px;
+        gap: 6px;
+      }
+
+      .score-card {
+        min-height: 48px;
+        padding: 6px 10px 7px;
+      }
+
       .next-card {
-        min-height: 54px;
+        width: 64px;
+        min-height: 64px;
+        padding: 7px;
       }
 
-      .score {
-        font-size: 1.55rem;
-      }
-
-      .best-box {
-        min-width: 64px;
-        padding: 5px 7px;
-      }
-
-      .help {
-        font-size: 0.72rem;
+      .score,
+      .best-score {
+        font-size: 1.2rem;
       }
 
     }
@@ -314,30 +379,31 @@
 </head>
 <body>
   <main class="app" aria-label="物理合体パズル">
-    <section class="hud" aria-label="スコアと次の果物">
-      <div class="score-card">
-        <div class="score-row">
-          <div>
-            <span class="label">SCORE</span>
-            <span class="score" id="score">0</span>
-          </div>
-          <div class="best-box">
-            <span class="label">BEST</span>
-            <span class="best-score" id="bestScore">0</span>
-          </div>
+    <section class="hud-wrap" aria-label="スコアと次の果物">
+      <div class="hud">
+        <div class="score-card">
+          <span class="label">SCORE</span>
+          <span class="score" id="score">0</span>
+        </div>
+        <div class="score-card">
+          <span class="label">BEST</span>
+          <span class="best-score" id="bestScore">0</span>
+        </div>
+        <div class="next-card">
+          <span class="label">NEXT</span>
+          <div class="next-preview" id="nextPreview"></div>
         </div>
       </div>
-      <div class="next-card">
-        <span class="label">NEXT</span>
-        <div class="next-preview" id="nextPreview"></div>
+      <div class="hold-meter" id="holdMeter">
+        <span></span>
+        <div class="ready-badge" id="readyBadge">KICK!</div>
       </div>
     </section>
 
     <section class="field-shell" id="fieldShell">
       <span class="line-label">GAME OVER LINE</span>
+      <div class="puzzle-frame" aria-hidden="true"></div>
       <canvas id="gameCanvas" width="360" height="600" aria-label="ゲームフィールド"></canvas>
-      <div class="ready-badge" id="readyBadge">READY</div>
-      <div class="hold-meter" id="holdMeter"><span></span></div>
       <div class="overlay" id="gameOverOverlay">
         <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="gameOverTitle">
           <h1 id="gameOverTitle">GAME OVER</h1>
@@ -347,9 +413,6 @@
       </div>
     </section>
 
-    <p class="help">
-      左右に動かしてクリック/タップで落下。お邪魔キャラは長押し1秒で画面外へ飛ばせます。
-    </p>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/matter-js@0.20.0/build/matter.min.js"></script>
@@ -364,13 +427,14 @@
         fieldWidth: 360,
         fieldHeight: 600,
         wallThickness: 34,
-        spawnY: 52,
-        gameOverLineY: 152,
+        spawnY: 112,
+        gameOverLineY: 172,
         gameOverGraceMs: 1800,
         mergeCooldownMs: 90,
         holdChargeMs: 200,
         holdReadyMs: 1000,
-        obstacleChance: 0.14,
+        kickPoseMs: 1500,
+        obstacleChance: 0.15,
         gravityY: 1.08,
         fruitRestitution: 0.18,
         fruitFriction: 0.55,
@@ -378,31 +442,39 @@
         obstacleHeavyDensity: 0.0048,
         normalDensity: 0.001,
         nextPoolCount: 5,
-        debugMode: true
+        debugMode: true,
+        showHitCircle: false
       };
 
       // 画像に差し替える場合は image にURLを入れ、drawFruitBody/drawCurrentPieceで描画を切り替える。
       const FRUITS = [
-        { id: "cherry", name: "さくらんぼ", radius: 11.5, score: 1, nextId: "strawberry", color: "#ef476f", text: "🍒", image: null },
-        { id: "strawberry", name: "いちご", radius: 15, score: 3, nextId: "grape", color: "#ff5a73", text: "🍓", image: null },
-        { id: "grape", name: "ぶどう", radius: 23, score: 6, nextId: "dekopon", color: "#8f6ad9", text: "🍇", image: null },
-        { id: "dekopon", name: "デコポン", radius: 26.5, score: 10, nextId: "persimmon", color: "#ff9f1c", text: "🍊", image: null },
-        { id: "persimmon", name: "柿", radius: 33.5, score: 15, nextId: "apple", color: "#f07c2f", text: "柿", image: null },
-        { id: "apple", name: "りんご", radius: 42, score: 21, nextId: "pear", color: "#e63946", text: "🍎", image: null },
-        { id: "pear", name: "梨", radius: 50, score: 28, nextId: "peach", color: "#c7df66", text: "梨", image: null },
-        { id: "peach", name: "桃", radius: 60, score: 36, nextId: "pineapple", color: "#ffb3c1", text: "🍑", image: null },
-        { id: "pineapple", name: "パイン", radius: 70, score: 45, nextId: "melon", color: "#f9c74f", text: "🍍", image: null },
-        { id: "melon", name: "メロン", radius: 85, score: 55, nextId: "watermelon", color: "#80b918", text: "🍈", image: null },
-        { id: "watermelon", name: "スイカ", radius: 100, score: 66, nextId: null, color: "#2f9e44", text: "🍉", image: null }
+        { id: "cherry", name: "さくらんぼ", radius: 11.5, score: 1, nextId: "strawberry", color: "#ef476f", text: "🍒", image: "assets/img/fruits/01_mob.png", imageScale: 1.12, imageOffsetX: 0, imageOffsetY: 0 },
+        { id: "strawberry", name: "いちご", radius: 15, score: 3, nextId: "grape", color: "#ff5a73", text: "🍓", image: "assets/img/fruits/02_Receptionist.png", imageScale: 1.16, imageOffsetX: 0, imageOffsetY: 0 },
+        { id: "grape", name: "ぶどう", radius: 23, score: 6, nextId: "dekopon", color: "#8f6ad9", text: "🍇", image: "assets/img/fruits/03_brita.png", imageScale: 1.18, imageOffsetX: 0, imageOffsetY: 0 },
+        { id: "dekopon", name: "デコポン", radius: 26.5, score: 10, nextId: "persimmon", color: "#ff9f1c", text: "🍊", image: "assets/img/fruits/04_ninya.png", imageScale: 1.18, imageOffsetX: 0, imageOffsetY: -2 },
+        { id: "persimmon", name: "柿", radius: 33.5, score: 15, nextId: "apple", color: "#f07c2f", text: "柿", image: "assets/img/fruits/05_enri.png", imageScale: 1.32, imageOffsetX: -2, imageOffsetY: 10 },
+        { id: "apple", name: "りんご", radius: 42, score: 21, nextId: "pear", color: "#e63946", text: "🍎", image: "assets/img/fruits/06_Nfirea.png", imageScale: 1.083, imageOffsetX: 0, imageOffsetY: 0 },
+        { id: "pear", name: "梨", radius: 50, score: 28, nextId: "peach", color: "#c7df66", text: "梨", image: "assets/img/fruits/07_Clementine.png", imageScale: 1.14, imageOffsetX: 0, imageOffsetY: 0 },
+        { id: "peach", name: "桃", radius: 60, score: 36, nextId: "pineapple", color: "#ffb3c1", text: "🍑", image: "assets/img/fruits/08_Jaldabaoth.png", imageScale: 1.2, imageOffsetX: 0, imageOffsetY: 0 },
+        { id: "pineapple", name: "パイン", radius: 70, score: 45, nextId: "melon", color: "#f9c74f", text: "🍍", image: "assets/img/fruits/09_hamusuke.png", imageScale: 1.12, imageOffsetX: 0, imageOffsetY: 0 },
+        { id: "melon", name: "メロン", radius: 85, score: 55, nextId: "watermelon", color: "#80b918", text: "🍈", image: "assets/img/fruits/10_Narbe.png", imageScale: 1.239, imageOffsetX: 10, imageOffsetY: -6 },
+        { id: "watermelon", name: "スイカ", radius: 100, score: 66, nextId: null, color: "#2f9e44", text: "🍉", image: "assets/img/fruits/11_momon.png", imageScale: 1.16, imageOffsetX: 0, imageOffsetY: -14 }
       ];
 
       const OBSTACLES = [
-        { id: "evil-a", name: "お邪魔A", radius: 23, density: 0.0050, heavyDensity: 0.0100, color: "#7c4dff", text: "邪", image: null },
-        { id: "evil-b", name: "お邪魔B", radius: 33.5, density: 0.0050, heavyDensity: 0.0100, color: "#00a6a6", text: "乱", image: null },
-        { id: "evil-c", name: "お邪魔C", radius: 50, density: 0.0050, heavyDensity: 0.0100, color: "#a64d79", text: "重", image: null }
+        { id: "evil-a", name: "お邪魔小", radius: 23, density: 0.0050, heavyDensity: 0.0100, color: "#7c4dff", text: "12", image: "assets/img/obstacles/12_dyne_1.png", throwImage: "assets/img/obstacles/12_dyne_2.png", imageScale: 1.121, imageOffsetX: 0, imageOffsetY: 0 },
+        { id: "evil-b", name: "お邪魔中", radius: 33.5, density: 0.0050, heavyDensity: 0.0100, color: "#00a6a6", text: "13", image: "assets/img/obstacles/13_nigun_1.png", throwImage: "assets/img/obstacles/13_nigun_2.png", imageScale: 1.067, imageOffsetX: 0, imageOffsetY: -2 },
+        { id: "evil-c", name: "お邪魔大", radius: 50, density: 0.0050, heavyDensity: 0.0100, color: "#a64d79", text: "14", image: "assets/img/obstacles/14_buoh_1.png", throwImage: "assets/img/obstacles/14_buoh_2.png", imageScale: 1.16, imageOffsetX: 0, imageOffsetY: 0 }
       ];
 
+      const UI_IMAGES = {
+        fly: "assets/img/ui/evileye_fly.png",
+        kick: "assets/img/ui/evileye_kick.png",
+        angry: "assets/img/ui/angry.png"
+      };
+
       const fruitById = new Map(FRUITS.map((fruit, index) => [fruit.id, { ...fruit, level: index }]));
+      const imageCache = new Map();
 
       // ===== DOM / canvas =====
       const canvas = document.getElementById("gameCanvas");
@@ -435,7 +507,8 @@
         effects: [],
         pendingMerges: new Set(),
         rafId: 0,
-        lastDropAt: 0
+        lastDropAt: 0,
+        characterSide: "right"
       };
 
       // ===== Utility =====
@@ -446,6 +519,24 @@
       const nextObstacleData = () => ({ type: "obstacle", data: randomItem(OBSTACLES) });
       const randomDropData = () => Math.random() < CONFIG.obstacleChance ? nextObstacleData() : nextFruitData();
       const BEST_SCORE_KEY = "evileye-momon-best-score";
+
+      function preloadImages() {
+        for (const item of [...FRUITS, ...OBSTACLES]) {
+          for (const src of [item.image, item.throwImage]) {
+            if (!src || imageCache.has(src)) continue;
+            const image = new Image();
+            image.src = src;
+            imageCache.set(src, image);
+          }
+        }
+
+        for (const src of Object.values(UI_IMAGES)) {
+          if (imageCache.has(src)) continue;
+          const image = new Image();
+          image.src = src;
+          imageCache.set(src, image);
+        }
+      }
 
       function setScore(value) {
         state.score = value;
@@ -588,20 +679,43 @@
 
       function throwAwayCurrentObstacle() {
         if (!state.current || state.current.type !== "obstacle") return;
+        const x = clampCurrentX(state.pointerX);
+        const radius = state.current.data.radius;
+        const leftSpace = x - radius;
+        const rightSpace = CONFIG.fieldWidth - x - radius;
+        let direction = rightSpace >= leftSpace ? 1 : -1;
+        direction = chooseKickDirection(x, direction);
+        state.characterSide = direction > 0 ? "left" : "right";
+        const exitX = direction > 0 ? CONFIG.fieldWidth + radius * 2 : -radius * 2;
+        const throwData = {
+          ...state.current.data,
+          image: state.current.data.throwImage || state.current.data.image
+        };
+
         state.lastDropAt = now();
         state.effects.push({
           type: "throw",
-          x: clampCurrentX(state.pointerX),
+          x,
+          exitX,
+          direction,
           y: CONFIG.spawnY,
-          radius: state.current.data.radius,
-          data: state.current.data,
+          radius,
+          data: throwData,
           bornAt: now(),
-          life: 420
+          life: 3000
+        });
+        state.effects.push({
+          type: "kick",
+          x,
+          y: CONFIG.spawnY,
+          direction,
+          bornAt: now(),
+          life: CONFIG.kickPoseMs
         });
         state.current = null;
         setTimeout(() => {
           if (!state.isGameOver) prepareQueue();
-        }, 180);
+        }, CONFIG.kickPoseMs);
       }
 
       function maybeMakeObstacleHeavy() {
@@ -728,6 +842,7 @@
         state.current = null;
         state.next = null;
         state.pointerX = CONFIG.fieldWidth / 2;
+        state.characterSide = "right";
         state.overLineSince = null;
         state.effects = [];
         state.pendingMerges.clear();
@@ -745,14 +860,24 @@
         const drop = state.next;
         if (!drop) {
           nextPreview.textContent = "";
+          nextPreview.style.background = "";
+          nextPreview.style.backgroundImage = "";
+          nextPreview.classList.remove("is-obstacle-preview");
           return;
         }
 
         const size = Math.max(24, Math.min(40, drop.data.radius * 1.3));
-        nextPreview.textContent = drop.data.text;
+        nextPreview.classList.toggle("is-obstacle-preview", drop.type === "obstacle");
+        nextPreview.textContent = drop.data.image ? "" : drop.data.text;
         nextPreview.style.color = "#fff";
         nextPreview.style.fontSize = `${drop.type === "obstacle" ? 24 : size}px`;
-        nextPreview.style.background = `radial-gradient(circle at 35% 30%, rgba(255,255,255,.45), ${drop.data.color} 62%, rgba(0,0,0,.28))`;
+        nextPreview.style.background = drop.data.image
+          ? "rgba(0,0,0,.18)"
+          : `radial-gradient(circle at 35% 30%, rgba(255,255,255,.45), ${drop.data.color} 62%, rgba(0,0,0,.28))`;
+        nextPreview.style.backgroundImage = drop.data.image ? `url("${drop.data.image}")` : "";
+        nextPreview.style.backgroundPosition = "center";
+        nextPreview.style.backgroundRepeat = "no-repeat";
+        nextPreview.style.backgroundSize = "contain";
         nextPreview.style.borderRadius = "999px";
         nextPreview.style.width = `${size}px`;
         nextPreview.style.margin = "5px auto 0";
@@ -766,7 +891,7 @@
 
         const elapsed = now() - state.holdStartAt;
         state.holdProgress = clamp(elapsed / CONFIG.holdReadyMs, 0, 1);
-        holdMeter.classList.toggle("is-visible", elapsed >= CONFIG.holdChargeMs);
+        holdMeter.classList.add("is-visible");
         holdMeterBar.style.setProperty("--hold", `${Math.round(state.holdProgress * 100)}%`);
         readyBadge.classList.toggle("is-visible", elapsed >= CONFIG.holdReadyMs);
       }
@@ -860,10 +985,21 @@
 
       // ===== Rendering =====
       function resizeCanvasForDpr() {
-        const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
-        canvas.width = Math.round(CONFIG.fieldWidth * dpr);
-        canvas.height = Math.round(CONFIG.fieldHeight * dpr);
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        const rect = canvas.getBoundingClientRect();
+        const dpr = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
+        const cssScale = rect.width > 0 ? rect.width / CONFIG.fieldWidth : 1;
+        const renderScale = Math.max(1, Math.min(3, cssScale * dpr));
+        const width = Math.round(CONFIG.fieldWidth * renderScale);
+        const height = Math.round(CONFIG.fieldHeight * renderScale);
+
+        if (canvas.width !== width || canvas.height !== height) {
+          canvas.width = width;
+          canvas.height = height;
+        }
+
+        ctx.setTransform(renderScale, 0, 0, renderScale, 0, 0);
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = "high";
       }
 
       function drawLoop() {
@@ -884,8 +1020,17 @@
           if (body.plugin.kind === "obstacle") drawObstacleBody(body);
         }
 
-        if (state.current && !state.isGameOver) drawCurrentPiece();
+        if (state.current && !state.isGameOver) {
+          drawCurrentPiece();
+        } else if (!state.isGameOver && !hasActiveKickEffect()) {
+          drawIdleFlyCharacter();
+        }
         drawEffects();
+      }
+
+      function hasActiveKickEffect() {
+        const t = now();
+        return state.effects.some((effect) => effect.type === "kick" && t - effect.bornAt < effect.life);
       }
 
       function drawField() {
@@ -899,21 +1044,6 @@
         ctx.stroke();
         ctx.restore();
 
-        ctx.save();
-        ctx.strokeStyle = "rgba(255, 211, 106, 0.45)";
-        ctx.lineWidth = 4;
-        ctx.beginPath();
-        ctx.moveTo(2, CONFIG.gameOverLineY);
-        ctx.lineTo(2, CONFIG.fieldHeight);
-        ctx.moveTo(CONFIG.fieldWidth - 2, CONFIG.gameOverLineY);
-        ctx.lineTo(CONFIG.fieldWidth - 2, CONFIG.fieldHeight);
-        ctx.moveTo(0, CONFIG.fieldHeight - 2);
-        ctx.lineTo(CONFIG.fieldWidth, CONFIG.fieldHeight - 2);
-        ctx.stroke();
-        ctx.restore();
-
-        ctx.fillStyle = "rgba(255, 211, 106, 0.12)";
-        ctx.fillRect(0, CONFIG.fieldHeight - 8, CONFIG.fieldWidth, 8);
       }
 
       function drawBall(x, y, radius, rotation, data, options = {}) {
@@ -924,28 +1054,186 @@
         ctx.translate(x, y);
         ctx.rotate(rotation || 0);
 
+        const image = data.image ? imageCache.get(data.image) : null;
+        if (image?.complete && image.naturalWidth > 0) {
+          const maxSize = r * 2 * (data.imageScale || 1);
+          const aspect = image.naturalWidth / image.naturalHeight;
+          const drawWidth = aspect >= 1 ? maxSize : maxSize * aspect;
+          const drawHeight = aspect >= 1 ? maxSize / aspect : maxSize;
+          const offsetX = (data.imageOffsetX || 0) * pulse;
+          const offsetY = (data.imageOffsetY || 0) * pulse;
+          ctx.drawImage(image, offsetX - drawWidth / 2, offsetY - drawHeight / 2, drawWidth, drawHeight);
+        } else {
+          ctx.beginPath();
+          ctx.arc(0, 0, r, 0, Math.PI * 2);
+          ctx.fillStyle = data.color;
+          ctx.fill();
+
+          const gradient = ctx.createRadialGradient(-r * 0.35, -r * 0.35, r * 0.05, 0, 0, r);
+          gradient.addColorStop(0, "rgba(255,255,255,0.55)");
+          gradient.addColorStop(0.55, "rgba(255,255,255,0.03)");
+          gradient.addColorStop(1, "rgba(0,0,0,0.28)");
+          ctx.fillStyle = gradient;
+          ctx.fill();
+
+          ctx.lineWidth = Math.max(2, r * 0.08);
+          ctx.strokeStyle = options.outline || "rgba(255,255,255,0.35)";
+          ctx.stroke();
+
+          ctx.rotate(-(rotation || 0));
+          ctx.fillStyle = "#fff9ec";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.font = `900 ${Math.max(12, r * 0.75)}px system-ui, sans-serif`;
+          ctx.fillText(data.text, 0, 1);
+          ctx.rotate(rotation || 0);
+        }
+
+        drawHitCircle(r);
+        ctx.restore();
+      }
+
+      function drawHitCircle(radius) {
+        if (!CONFIG.debugMode || !CONFIG.showHitCircle) return;
+
+        ctx.save();
+        ctx.setLineDash([]);
+        ctx.strokeStyle = "rgba(255, 40, 40, 0.95)";
+        ctx.lineWidth = Math.max(1.5, radius * 0.035);
         ctx.beginPath();
-        ctx.arc(0, 0, r, 0, Math.PI * 2);
-        ctx.fillStyle = data.color;
-        ctx.fill();
-
-        const gradient = ctx.createRadialGradient(-r * 0.35, -r * 0.35, r * 0.05, 0, 0, r);
-        gradient.addColorStop(0, "rgba(255,255,255,0.55)");
-        gradient.addColorStop(0.55, "rgba(255,255,255,0.03)");
-        gradient.addColorStop(1, "rgba(0,0,0,0.28)");
-        ctx.fillStyle = gradient;
-        ctx.fill();
-
-        ctx.lineWidth = Math.max(2, r * 0.08);
-        ctx.strokeStyle = options.outline || "rgba(255,255,255,0.35)";
+        ctx.arc(0, 0, radius, 0, Math.PI * 2);
         ctx.stroke();
 
-        ctx.rotate(-(rotation || 0));
-        ctx.fillStyle = "#fff9ec";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.font = `900 ${Math.max(12, r * 0.75)}px system-ui, sans-serif`;
-        ctx.fillText(data.text, 0, 1);
+        ctx.beginPath();
+        ctx.moveTo(-Math.min(10, radius * 0.35), 0);
+        ctx.lineTo(Math.min(10, radius * 0.35), 0);
+        ctx.moveTo(0, -Math.min(10, radius * 0.35));
+        ctx.lineTo(0, Math.min(10, radius * 0.35));
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      function drawImageAsset(src, x, y, width, options = {}) {
+        const image = imageCache.get(src);
+        if (!image?.complete || image.naturalWidth <= 0) return;
+
+        const aspect = image.naturalWidth / image.naturalHeight;
+        const height = width / aspect;
+        const rotation = options.rotation || 0;
+        const alpha = options.alpha ?? 1;
+        const flipX = options.flipX ? -1 : 1;
+
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(rotation);
+        ctx.scale(flipX, 1);
+        ctx.globalAlpha *= alpha;
+        ctx.drawImage(image, -width / 2, -height / 2, width, height);
+        ctx.restore();
+      }
+
+      function updateCharacterSide(x) {
+        const side = state.characterSide;
+        const centerX = x + (side === "right" ? 34 : -34);
+        const halfWidth = 48;
+
+        if (side === "right" && centerX + halfWidth > CONFIG.fieldWidth) {
+          state.characterSide = "left";
+        } else if (side === "left" && centerX - halfWidth < 0) {
+          state.characterSide = "right";
+        }
+      }
+
+      function chooseKickDirection(x, preferredDirection) {
+        const kickWidth = 112.5;
+        const kickOffset = 32;
+        const halfWidth = kickWidth / 2;
+        const kickCenterX = x + preferredDirection * -kickOffset;
+        const clips = kickCenterX - halfWidth < 0 || kickCenterX + halfWidth > CONFIG.fieldWidth;
+        return clips ? -preferredDirection : preferredDirection;
+      }
+
+      function drawFlyCharacter(x, y, showAngry) {
+        updateCharacterSide(x);
+        const side = state.characterSide;
+        const sideSign = side === "right" ? 1 : -1;
+        const bob = Math.sin(now() / 180) * 2.5;
+        const characterX = x + sideSign * 34;
+        const flipX = side === "left";
+
+        drawImageAsset(UI_IMAGES.fly, characterX, y - 56 + bob, 96, { flipX });
+
+        if (showAngry) {
+          const angryPulse = 1 + Math.sin(now() / 80) * 0.08;
+          drawImageAsset(UI_IMAGES.angry, characterX, y - 84 + bob, 28 * angryPulse, {
+            rotation: sideSign * -0.18
+          });
+        }
+      }
+
+      function drawFruitAura(x, y, radius, intensity = 1) {
+        const t = now() / 1000;
+        const pulse = 1 + Math.sin(t * 5.2) * 0.05;
+
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.globalCompositeOperation = "lighter";
+
+        const glow = ctx.createRadialGradient(0, 0, radius * 0.78, 0, 0, radius * 1.55 * pulse);
+        glow.addColorStop(0, "rgba(80, 170, 255, 0)");
+        glow.addColorStop(0.52, `rgba(80, 190, 255, ${0.18 * intensity})`);
+        glow.addColorStop(0.76, `rgba(145, 235, 255, ${0.36 * intensity})`);
+        glow.addColorStop(1, "rgba(80, 170, 255, 0)");
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(0, 0, radius * 1.62 * pulse, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = `rgba(145, 235, 255, ${0.7 * intensity})`;
+        ctx.lineWidth = Math.max(1.8, radius * 0.055);
+        ctx.beginPath();
+        ctx.arc(0, 0, radius * 1.13 * pulse, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.restore();
+      }
+
+      function drawObstacleAura(x, y, radius, intensity = 1) {
+        const t = now() / 1000;
+        const pulse = 0.9 + Math.sin(t * 6.4) * 0.08;
+        const spin = t * 2.2;
+
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.globalCompositeOperation = "lighter";
+
+        const glow = ctx.createRadialGradient(0, 0, radius * 0.35, 0, 0, radius * 1.85 * pulse);
+        glow.addColorStop(0, `rgba(255, 25, 45, ${0.12 * intensity})`);
+        glow.addColorStop(0.52, `rgba(255, 25, 45, ${0.25 * intensity})`);
+        glow.addColorStop(1, "rgba(255, 25, 45, 0)");
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(0, 0, radius * 1.9 * pulse, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.rotate(spin);
+        ctx.strokeStyle = `rgba(255, 45, 58, ${0.58 * intensity})`;
+        ctx.lineWidth = Math.max(1.5, radius * 0.045);
+        ctx.setLineDash([radius * 0.22, radius * 0.16]);
+        ctx.beginPath();
+        ctx.arc(0, 0, radius * 1.22 * pulse, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.setLineDash([]);
+        ctx.fillStyle = `rgba(255, 55, 65, ${0.75 * intensity})`;
+        for (let i = 0; i < 5; i++) {
+          const angle = spin * 0.7 + i * Math.PI * 0.4;
+          const distance = radius * (1.12 + Math.sin(t * 4 + i) * 0.16);
+          ctx.beginPath();
+          ctx.arc(Math.cos(angle) * distance, Math.sin(angle) * distance, Math.max(1.6, radius * 0.07), 0, Math.PI * 2);
+          ctx.fill();
+        }
+
         ctx.restore();
       }
 
@@ -956,20 +1244,10 @@
 
       function drawObstacleBody(body) {
         const data = OBSTACLES.find((item) => item.id === body.plugin.dataId) || OBSTACLES[0];
+        drawObstacleAura(body.position.x, body.position.y, data.radius, body.plugin.isHeavy ? 1.08 : 0.82);
         drawBall(body.position.x, body.position.y, data.radius, body.angle, data, {
-          outline: body.plugin.isHeavy ? "rgba(255, 211, 106, 0.9)" : "rgba(255,255,255,0.38)"
+          outline: "rgba(255,255,255,0.38)"
         });
-
-        if (body.plugin.isHeavy) {
-          ctx.save();
-          ctx.globalAlpha = 0.7;
-          ctx.strokeStyle = "#ffd36a";
-          ctx.lineWidth = 2;
-          ctx.beginPath();
-          ctx.arc(body.position.x, body.position.y, data.radius + 5, 0, Math.PI * 2);
-          ctx.stroke();
-          ctx.restore();
-        }
       }
 
       function drawCurrentPiece() {
@@ -977,10 +1255,16 @@
         const x = clampCurrentX(state.pointerX);
         const y = CONFIG.spawnY;
         const isReady = state.current.type === "obstacle" && state.holdProgress >= 1;
+        const isChargingObstacle = state.current.type === "obstacle" && state.isPointerDown;
         const pulse = isReady ? 1.12 + Math.sin(now() / 60) * 0.04 : 1;
 
         ctx.save();
-        ctx.globalAlpha = 0.92;
+        drawFlyCharacter(x, y, isChargingObstacle);
+        if (state.current.type === "obstacle") {
+          drawObstacleAura(x, y, data.radius * pulse, isReady ? 1.2 : 0.9);
+        } else {
+          drawFruitAura(x, y, data.radius * pulse, 0.9);
+        }
         drawBall(x, y, data.radius, 0, data, {
           pulse,
           outline: isReady ? "#86d1ff" : "rgba(255,255,255,0.62)"
@@ -993,6 +1277,11 @@
         ctx.lineTo(x, CONFIG.fieldHeight - 10);
         ctx.stroke();
         ctx.restore();
+      }
+
+      function drawIdleFlyCharacter() {
+        const x = clamp(state.pointerX, 24, CONFIG.fieldWidth - 24);
+        drawFlyCharacter(x, CONFIG.spawnY, false);
       }
 
       function drawEffects() {
@@ -1029,15 +1318,34 @@
           if (effect.type === "throw") {
             ctx.save();
             ctx.globalAlpha = 1 - p;
-            drawBall(effect.x + p * 260, effect.y - p * 120, effect.radius, p * 8, effect.data, { pulse: 1 - p * 0.35 });
+            const eased = 1 - Math.pow(1 - p, 2);
+            const x = effect.x + (effect.exitX - effect.x) * eased;
+            const bounce = Math.abs(Math.sin(p * Math.PI * 6));
+            const y = effect.y + p * 38 - bounce * 22;
+            drawObstacleAura(x, y, effect.radius, 1 - p * 0.28);
+            drawBall(x, y, effect.radius, effect.direction * p * 11, effect.data, { pulse: 1 - p * 0.18 });
             ctx.restore();
+          }
+
+          if (effect.type === "kick") {
+            const fadeIn = clamp(p / 0.12, 0, 1);
+            const fadeOut = clamp((1 - p) / 0.07, 0, 1);
+            const alpha = Math.min(fadeIn, fadeOut);
+            const wobble = Math.sin(p * Math.PI * 5) * 0.035;
+            drawImageAsset(UI_IMAGES.kick, effect.x + effect.direction * -32, effect.y - 24, 112.5, {
+              alpha,
+              rotation: wobble,
+              flipX: effect.direction > 0
+            });
           }
         }
       }
 
       window.addEventListener("resize", resizeCanvasForDpr);
+      preloadImages();
       restartGame();
     })();
   </script>
 </body>
 </html>
+
