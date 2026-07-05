@@ -7,6 +7,7 @@
   <style>
     :root {
       color-scheme: dark;
+      --app-height: 100dvh;
       --bg: #19140f;
       --panel: #2a2119;
       --panel-2: #3a2a1d;
@@ -27,7 +28,7 @@
       min-height: 100%;
       background:
         linear-gradient(rgba(5, 8, 12, 0.12), rgba(5, 8, 12, 0.24)),
-        url("assets/img/ui/background.png") center top / auto 100dvh no-repeat;
+        url("assets/img/ui/background.png") center top / auto var(--app-height) no-repeat;
       background-color: #0f0c09;
       color: var(--ink);
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -39,14 +40,15 @@
     body {
       height: 100vh;
       height: 100dvh;
+      height: var(--app-height);
       display: grid;
       place-items: center;
-      padding: 14px;
+      padding: 10px 14px calc(10px + env(safe-area-inset-bottom, 0px));
       overflow: hidden;
     }
 
     .app {
-      width: min(100%, 460px, calc((100dvh - 158px) * 0.6));
+      width: min(100%, 460px, calc((var(--app-height) - 158px) * 0.6));
       display: grid;
       gap: 10px;
     }
@@ -175,7 +177,7 @@
       position: absolute;
       left: 50%;
       top: calc(25.333% - 20px);
-      width: min(100vw, calc(100dvh * 0.5625));
+      width: min(100vw, calc(var(--app-height) * 0.5625));
       aspect-ratio: 45 / 56;
       z-index: 0;
       background: url("assets/img/ui/pazzlearea.png") center / 100% 100% no-repeat;
@@ -338,7 +340,7 @@
       }
 
       .app {
-        width: min(100%, 520px, calc((100dvh - 160px) * 0.6));
+        width: min(100%, 520px, calc((var(--app-height) - 160px) * 0.6));
       }
 
       .next-card {
@@ -349,7 +351,7 @@
 
     @media (max-height: 720px) {
       .app {
-        width: min(100%, 390px, calc((100dvh - 182px) * 0.6));
+        width: min(100%, 390px, calc((var(--app-height) - 182px) * 0.6));
         gap: 8px;
       }
 
@@ -372,6 +374,10 @@
       .score,
       .best-score {
         font-size: 1.2rem;
+      }
+
+      .puzzle-frame {
+        width: min(100vw, calc(var(--app-height) * 0.49));
       }
 
     }
@@ -419,6 +425,16 @@
   <script>
     (() => {
       "use strict";
+
+      function syncViewportHeight() {
+        const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+        document.documentElement.style.setProperty("--app-height", `${Math.floor(viewportHeight)}px`);
+      }
+
+      syncViewportHeight();
+      window.addEventListener("resize", syncViewportHeight, { passive: true });
+      window.visualViewport?.addEventListener("resize", syncViewportHeight, { passive: true });
+      window.visualViewport?.addEventListener("scroll", syncViewportHeight, { passive: true });
 
       const { Engine, Runner, Bodies, Body, Composite, Events } = Matter;
 
