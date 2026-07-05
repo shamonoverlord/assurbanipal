@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="ja">
 <head>
   <!-- Google tag (gtag.js) -->
@@ -29,6 +29,10 @@
 
     * {
       box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
     }
 
     html,
@@ -43,7 +47,14 @@
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       overflow: hidden;
       touch-action: manipulation;
+      overscroll-behavior: none;
       user-select: none;
+    }
+
+    img,
+    canvas {
+      -webkit-user-drag: none;
+      user-drag: none;
     }
 
     body {
@@ -62,6 +73,28 @@
       gap: 10px;
     }
 
+    .site-disclaimer {
+      position: absolute;
+      left: 0;
+      top: var(--site-disclaimer-top, 82px);
+      z-index: 3;
+      width: 100%;
+      margin: 0;
+      padding: 2px 5px;
+      border-radius: 4px;
+      background: rgba(0, 0, 0, 0.48);
+      color: rgba(255, 210, 210, 0.96);
+      font-size: clamp(0.42rem, 1.6vw, 0.54rem);
+      font-weight: 800;
+      line-height: 1.2;
+      text-align: left;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.78);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      pointer-events: none;
+    }
+
     .hud {
       display: grid;
       grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 74px;
@@ -70,8 +103,21 @@
     }
 
     .hud-wrap {
+      position: relative;
+      --site-disclaimer-top: 80px;
       display: grid;
       gap: 6px;
+      transform: translateY(-28px);
+      z-index: 4;
+    }
+
+    .app.is-game-over .hud-wrap {
+      position: relative;
+      z-index: 22;
+    }
+
+    .app.is-game-over .help-button {
+      display: none;
     }
 
     .score-card,
@@ -122,6 +168,22 @@
       padding: 8px;
       background-image: url("assets/img/ui/next.png");
       text-align: center;
+    }
+
+    .help-button {
+      position: absolute;
+      right: 0;
+      top: calc(100% + 6px);
+      z-index: 4;
+      width: 28px;
+      min-height: 28px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 224, 138, 0.72);
+      background: rgba(24, 28, 30, 0.92);
+      color: var(--gold);
+      font-size: 1rem;
+      line-height: 1;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.32);
     }
 
     .next-preview {
@@ -219,21 +281,24 @@
 
     .line-label {
       position: absolute;
-      top: 23.667%;
+      top: calc(23.667% - 4px);
       left: 12px;
       z-index: 2;
       color: var(--danger);
-      font-size: 0.84rem;
+      font-size: 0.92rem;
       font-weight: 800;
       pointer-events: none;
       text-shadow: 0 1px 2px #000;
     }
 
     .hold-meter {
-      position: relative;
+      position: absolute;
+      left: 50%;
+      top: calc(var(--site-disclaimer-top) + 18px);
+      z-index: 3;
       width: min(62%, 220px);
       height: 24px;
-      justify-self: center;
+      transform: translateX(-50%);
       overflow: visible;
       border-radius: 999px;
       opacity: 0;
@@ -304,13 +369,13 @@
     }
 
     .overlay {
-      position: absolute;
+      position: fixed;
       inset: 0;
-      z-index: 5;
+      z-index: 20;
       display: grid;
       place-items: center;
       padding: 24px;
-      background: rgba(7, 5, 4, 0.72);
+      background: rgba(7, 5, 4, 0.78);
       opacity: 0;
       pointer-events: none;
       transition: opacity 160ms ease;
@@ -322,6 +387,8 @@
     }
 
     .dialog {
+      position: relative;
+      z-index: 22;
       width: min(100%, 280px);
       padding: 20px;
       border: 1px solid rgba(255, 211, 106, 0.45);
@@ -342,6 +409,286 @@
       margin: 0 0 16px;
       color: var(--muted);
       font-weight: 700;
+    }
+
+    .social-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    .social-button {
+      width: auto;
+      min-width: 44px;
+      min-height: 40px;
+      padding: 0 14px;
+      border-radius: 999px;
+      display: inline-grid;
+      place-items: center;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+    }
+
+    .x-share-button {
+      width: 44px;
+      padding: 0;
+      background: #080808;
+      color: #fff;
+      font-size: 1.18rem;
+      letter-spacing: 0;
+    }
+
+    .copy-url-button {
+      background: linear-gradient(180deg, #f8e7a8, #bc8f45);
+      color: #231306;
+      font-size: 0.78rem;
+    }
+
+    .copy-feedback {
+      width: 100%;
+      min-height: 1.1em;
+      color: #ffdf55;
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-shadow: 0 1px 2px #000;
+      opacity: 0;
+      transition: opacity 120ms ease;
+    }
+
+    .copy-feedback.is-visible {
+      opacity: 1;
+    }
+
+    .image-modal {
+      --modal-reference-width: 520px;
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: grid;
+      place-items: center;
+      padding: 16px;
+      background: rgba(4, 3, 2, 0.72);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 160ms ease;
+    }
+
+    .image-modal.is-visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .image-modal-panel {
+      position: relative;
+      width: min(100%, 420px);
+      max-height: min(88vh, calc(var(--app-height) - 32px));
+      display: grid;
+      place-items: center;
+      transform: translateY(18px) scale(0.92);
+      opacity: 0;
+    }
+
+    .image-modal-panel.is-wide {
+      box-sizing: border-box;
+      width: min(94vw, calc(var(--modal-reference-width) - 12px));
+      max-height: min(86vh, calc(var(--app-height) - 28px));
+      padding: 8px;
+      border: 1px solid rgba(255, 211, 106, 0.48);
+      border-radius: 8px;
+      background: rgba(24, 28, 30, 0.96);
+      box-shadow: 0 22px 60px rgba(0, 0, 0, 0.48);
+    }
+
+    .image-modal-panel.is-tutorial {
+      box-sizing: border-box;
+      width: min(86vw, calc(var(--modal-reference-width) - 44px));
+      max-height: min(82vh, calc(var(--app-height) - 76px));
+      padding: 12px;
+      overflow: auto;
+      border: 1px solid rgba(255, 211, 106, 0.52);
+      border-radius: 10px;
+      background:
+        linear-gradient(180deg, rgba(58, 42, 29, 0.96), rgba(24, 28, 30, 0.98)),
+        rgba(24, 28, 30, 0.96);
+      box-shadow: 0 22px 60px rgba(0, 0, 0, 0.48);
+    }
+
+    .image-modal.is-visible .image-modal-panel {
+      animation: modalPopIn 520ms cubic-bezier(0.17, 1.42, 0.3, 1) forwards;
+    }
+
+    @keyframes modalPopIn {
+      0% {
+        opacity: 0;
+        transform: translateY(44px) scale(0.74) rotate(-2deg);
+      }
+
+      48% {
+        opacity: 1;
+        transform: translateY(-14px) scale(1.1) rotate(1deg);
+      }
+
+      76% {
+        opacity: 1;
+        transform: translateY(5px) scale(0.98) rotate(-0.4deg);
+      }
+
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .image-modal img {
+      display: block;
+      width: 100%;
+      max-height: min(88vh, calc(var(--app-height) - 32px));
+      object-fit: contain;
+      border-radius: 8px;
+      box-shadow: 0 22px 60px rgba(0, 0, 0, 0.48);
+    }
+
+    .image-modal-panel.is-wide img {
+      max-height: min(82vh, calc(var(--app-height) - 44px));
+      box-shadow: none;
+    }
+
+    .image-modal-placeholder {
+      width: 100%;
+      min-height: min(70vh, 520px);
+      display: grid;
+      place-items: center;
+      padding: 28px;
+      border: 1px solid rgba(255, 211, 106, 0.45);
+      border-radius: 8px;
+      background: rgba(24, 28, 30, 0.96);
+      color: var(--muted);
+      text-align: center;
+      font-weight: 800;
+    }
+
+    .tutorial-content {
+      width: 100%;
+      display: grid;
+      gap: 9px;
+      color: #fff;
+      text-align: center;
+    }
+
+    .tutorial-logo {
+      width: min(82%, 330px);
+      margin: 0 auto 2px;
+      display: block;
+      filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.24));
+    }
+
+    .tutorial-disclaimer {
+      padding: 9px 11px;
+      border: 1px solid rgba(255, 92, 92, 0.62);
+      border-radius: 8px;
+      background: rgba(88, 8, 16, 0.62);
+      color: #ff7777;
+      font-size: 0.94rem;
+      font-weight: 900;
+      line-height: 1.45;
+      text-align: left;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.58);
+    }
+
+    .tutorial-card {
+      display: grid;
+      gap: 10px;
+      padding: 13px;
+      border: 1px solid rgba(255, 211, 106, 0.44);
+      border-radius: 8px;
+      background: rgba(10, 12, 13, 0.46);
+    }
+
+    .tutorial-heading {
+      width: fit-content;
+      min-width: min(74%, 260px);
+      margin: 0 auto;
+      padding: 7px 18px;
+      border-radius: 6px;
+      background: rgba(24, 28, 30, 0.9);
+      color: var(--muted);
+      font-size: 1.05rem;
+      font-weight: 900;
+      line-height: 1.2;
+    }
+
+    .tutorial-text {
+      display: grid;
+      gap: 3px;
+      color: #fff;
+      font-size: 0.94rem;
+      font-weight: 850;
+      line-height: 1.45;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.44);
+    }
+
+    .tutorial-image-frame {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      background: rgba(24, 28, 30, 0.78);
+    }
+
+    .tutorial-image {
+      display: block;
+      width: 100%;
+      height: auto;
+      margin: 0 auto;
+      object-fit: contain;
+      border-radius: 6px;
+      box-shadow: none;
+    }
+
+    .image-modal .tutorial-obstacle-image {
+      width: min(46%, 190px);
+    }
+
+    .image-modal .tutorial-kick-image {
+      width: min(58%, 250px);
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .image-modal-social {
+      margin-top: 8px;
+    }
+
+    .image-modal-close {
+      position: absolute;
+      right: -6px;
+      top: -46px;
+      width: 40px;
+      min-height: 40px;
+      border-radius: 999px;
+      font-size: 1.4rem;
+      line-height: 1;
+    }
+
+    .image-modal-panel.is-tutorial .image-modal-close {
+      top: 8px;
+      right: 8px;
+      z-index: 2;
+    }
+
+    .image-modal [hidden] {
+      display: none !important;
     }
 
     button {
@@ -369,6 +716,10 @@
         width: 80px;
         min-height: 80px;
       }
+
+      .hud-wrap {
+        --site-disclaimer-top: 86px;
+      }
     }
 
     @media (max-width: 600px) and (max-height: 720px) {
@@ -391,6 +742,10 @@
         width: 64px;
         min-height: 64px;
         padding: 7px;
+      }
+
+      .hud-wrap {
+        --site-disclaimer-top: 70px;
       }
 
       .score,
@@ -416,8 +771,10 @@
         <div class="next-card">
           <span class="label">NEXT</span>
           <div class="next-preview" id="nextPreview"></div>
+          <button class="help-button" id="tutorialButton" type="button" aria-label="チュートリアルを開く">?</button>
         </div>
       </div>
+      <p class="site-disclaimer">※このサイト・ゲームは非公式のファン作品です。公式・権利者各位とは一切関係ありません。</p>
       <div class="hold-meter" id="holdMeter">
         <span></span>
         <div class="ready-badge" id="readyBadge">KICK!</div>
@@ -434,12 +791,64 @@
             <h1 id="gameOverTitle">GAME OVER</h1>
             <p>FINAL SCORE <span id="finalScore">0</span></p>
             <button type="button" id="restartButton">RESTART</button>
+            <div class="social-actions">
+              <button class="social-button x-share-button" id="gameOverShareButton" type="button" aria-label="Xに投稿する">𝕏</button>
+              <button class="social-button copy-url-button" id="gameOverCopyButton" type="button">URL COPY</button>
+              <div class="copy-feedback" id="gameOverCopyFeedback" aria-live="polite"></div>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
   </main>
+
+  <div class="image-modal" id="imageModal" aria-hidden="true">
+      <div class="image-modal-panel" role="dialog" aria-modal="true" aria-labelledby="imageModalTitle">
+        <button class="image-modal-close" id="imageModalClose" type="button" aria-label="閉じる">×</button>
+        <h2 class="sr-only" id="imageModalTitle">チュートリアル</h2>
+        <div class="tutorial-content" id="tutorialContent" hidden>
+          <img class="tutorial-logo" src="assets/img/ui/titlelogo.png" alt="イビルアイのモモン様に会いたい">
+          <p class="tutorial-disclaimer">このサイト・ゲームは非公式のファン作品です。公式・権利者各位とは一切関係ありません。作品に関する権利は各権利者に帰属します。権利者様よりご指摘があった場合は、速やかに対応いたします。</p>
+          <section class="tutorial-card" aria-label="ゲームの遊び方">
+            <h3 class="tutorial-heading">ゲームの遊び方</h3>
+          <div class="tutorial-text">
+            <span>同じ種類のキャラをぶつけて進化させよう！</span>
+            <span>キャラが進化するとポイントをゲット！</span>
+            <span>頑張ってイビルアイをモモン様に会わせてあげよう！</span>
+          </div>
+          <div class="tutorial-image-frame">
+            <img class="tutorial-image" src="assets/img/ui/chara_rev.png" alt="キャラの進化順">
+          </div>
+        </section>
+        <section class="tutorial-card" aria-label="お邪魔キャラ">
+          <h3 class="tutorial-heading">お邪魔キャラ</h3>
+          <div class="tutorial-text">
+            <span>キャラの中に3人お邪魔キャラがいるよ</span>
+            <span>お邪魔キャラは同じ種類でも合体しないよ！</span>
+          </div>
+          <div class="tutorial-image-frame">
+            <img class="tutorial-image tutorial-obstacle-image" src="assets/img/ui/obstacle.png" alt="お邪魔キャラ一覧">
+          </div>
+          <div class="tutorial-text">
+            <span>お邪魔キャラは長押しして退場させよう！</span>
+          </div>
+          <div class="tutorial-image-frame">
+            <img class="tutorial-image tutorial-kick-image" src="assets/img/ui/obstacle_kick.png" alt="お邪魔キャラ退場のイメージ">
+          </div>
+        </section>
+      </div>
+      <img id="imageModalImage" alt="">
+      <div class="image-modal-placeholder" id="imageModalPlaceholder">
+        <span>画像をここに表示します</span>
+      </div>
+      <div class="social-actions image-modal-social" id="congratsSocialActions" hidden>
+        <button class="social-button x-share-button" id="congratsShareButton" type="button" aria-label="Xに投稿する">𝕏</button>
+        <button class="social-button copy-url-button" id="congratsCopyButton" type="button">URL COPY</button>
+        <div class="copy-feedback" id="congratsCopyFeedback" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/matter-js@0.20.0/build/matter.min.js"></script>
   <script>
@@ -470,6 +879,7 @@
         holdChargeMs: 200,
         holdReadyMs: 1000,
         kickPoseMs: 1500,
+        watermelonModalDelayMs: 2000,
         obstacleChance: 0.10,
         gravityY: 1.08,
         fruitRestitution: 0.18,
@@ -478,7 +888,7 @@
         obstacleHeavyDensity: 0.0048,
         normalDensity: 0.001,
         nextPoolCount: 5,
-        debugMode: true,
+        debugMode: false,
         showHitCircle: false
       };
 
@@ -509,12 +919,78 @@
         angry: "assets/img/ui/angry.png"
       };
 
+      const MODAL_IMAGES = {
+        tutorial: "",
+        watermelon: "assets/img/ui/congratulations.png"
+      };
+
+      const TUTORIAL_IMAGES = {
+        logo: "assets/img/ui/titlelogo.png",
+        characterRoute: "assets/img/ui/chara_rev.png",
+        obstacle: "assets/img/ui/obstacle.png",
+        obstacleKick: "assets/img/ui/obstacle_kick.png"
+      };
+
+      const GAME_URL = "https://shamonoverlord.github.io/assurbanipal/games/evileye-momon/index.html";
+
       const fruitById = new Map(FRUITS.map((fruit, index) => [fruit.id, { ...fruit, level: index }]));
       const imageCache = new Map();
+
+      // ===== Analytics =====
+      function createSessionId() {
+        return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      }
+
+      function elapsedTimeSec() {
+        return state.playStartedAt ? Math.max(0, Math.floor((now() - state.playStartedAt) / 1000)) : 0;
+      }
+
+      function maxFruitParams() {
+        const fruit = FRUITS[state.maxFruitLevel] || null;
+        return {
+          max_fruit_level: state.maxFruitLevel,
+          max_fruit_type: fruit ? fruit.id : "none"
+        };
+      }
+
+      function trackGameEvent(eventName, params = {}) {
+        if (typeof gtag !== "function") return;
+
+        gtag("event", eventName, {
+          game_name: "evileye-momon",
+          game_type: "suika",
+          page_path: window.location.pathname,
+          session_id: state.sessionId,
+          ...params
+        });
+      }
+
+      function trackGameStart(inputType) {
+        if (state.hasTrackedGameStart) return;
+        state.hasTrackedGameStart = true;
+        state.playStartedAt = now();
+        trackGameEvent("game_start", {
+          input_type: inputType || "unknown"
+        });
+      }
+
+      function trackMaxFruitReached(data) {
+        const fruit = fruitById.get(data.id);
+        if (!fruit || fruit.level <= state.maxFruitLevel) return;
+
+        state.maxFruitLevel = fruit.level;
+        trackGameEvent("max_fruit_reached", {
+          fruit_type: fruit.id,
+          fruit_level: fruit.level,
+          current_score: state.score,
+          elapsed_time_sec: elapsedTimeSec()
+        });
+      }
 
       // ===== DOM / canvas =====
       const canvas = document.getElementById("gameCanvas");
       const ctx = canvas.getContext("2d");
+      const app = document.querySelector(".app");
       const shell = document.getElementById("fieldShell");
       const board = shell.querySelector(".board");
       const scoreEl = document.getElementById("score");
@@ -523,6 +999,21 @@
       const overlay = document.getElementById("gameOverOverlay");
       const finalScoreEl = document.getElementById("finalScore");
       const restartButton = document.getElementById("restartButton");
+      const gameOverShareButton = document.getElementById("gameOverShareButton");
+      const gameOverCopyButton = document.getElementById("gameOverCopyButton");
+      const gameOverCopyFeedback = document.getElementById("gameOverCopyFeedback");
+      const tutorialButton = document.getElementById("tutorialButton");
+      const imageModal = document.getElementById("imageModal");
+      const imageModalPanel = imageModal.querySelector(".image-modal-panel");
+      const imageModalClose = document.getElementById("imageModalClose");
+      const tutorialContent = document.getElementById("tutorialContent");
+      const imageModalImage = document.getElementById("imageModalImage");
+      const imageModalPlaceholder = document.getElementById("imageModalPlaceholder");
+      const imageModalTitle = document.getElementById("imageModalTitle");
+      const congratsSocialActions = document.getElementById("congratsSocialActions");
+      const congratsShareButton = document.getElementById("congratsShareButton");
+      const congratsCopyButton = document.getElementById("congratsCopyButton");
+      const congratsCopyFeedback = document.getElementById("congratsCopyFeedback");
       const readyBadge = document.getElementById("readyBadge");
       const holdMeter = document.getElementById("holdMeter");
       const holdMeterBar = holdMeter.querySelector("span");
@@ -545,7 +1036,24 @@
         pendingMerges: new Set(),
         rafId: 0,
         lastDropAt: 0,
-        characterSide: "right"
+        characterSide: "right",
+        isModalOpen: false,
+        isCelebrationPending: false,
+        hasShownWatermelonModal: false,
+        celebrationTimer: 0,
+        modalPausedRunner: false,
+        modalMarksTutorialSeen: false,
+        sessionId: createSessionId(),
+        playStartedAt: 0,
+        hasTrackedGameStart: false,
+        dropCount: 0,
+        mergeCount: 0,
+        watermelonCount: 0,
+        obstacleCount: 0,
+        maxFruitLevel: -1,
+        hasTrackedBestScoreUpdate: false,
+        bestScoreAtStart: 0,
+        allowProgrammaticSelection: false
       };
 
       // ===== Utility =====
@@ -556,6 +1064,7 @@
       const nextObstacleData = () => ({ type: "obstacle", data: randomItem(OBSTACLES) });
       const randomDropData = () => Math.random() < CONFIG.obstacleChance ? nextObstacleData() : nextFruitData();
       const BEST_SCORE_KEY = "evileye-momon-best-score";
+      const TUTORIAL_SEEN_KEY = "evileye-momon-tutorial-seen";
 
       function preloadImages() {
         for (const item of [...FRUITS, ...OBSTACLES]) {
@@ -567,8 +1076,8 @@
           }
         }
 
-        for (const src of Object.values(UI_IMAGES)) {
-          if (imageCache.has(src)) continue;
+        for (const src of [...Object.values(UI_IMAGES), ...Object.values(MODAL_IMAGES), ...Object.values(TUTORIAL_IMAGES)]) {
+          if (!src || imageCache.has(src)) continue;
           const image = new Image();
           image.src = src;
           imageCache.set(src, image);
@@ -593,8 +1102,19 @@
 
       function updateBestScore(score) {
         if (score <= state.bestScore) return;
+        const oldBestScore = state.bestScore;
         setBestScore(score);
         localStorage.setItem(BEST_SCORE_KEY, String(score));
+        if (!state.hasTrackedBestScoreUpdate && score > state.bestScoreAtStart) {
+          state.hasTrackedBestScoreUpdate = true;
+          trackGameEvent("best_score_update", {
+            old_best_score: oldBestScore,
+            new_best_score: score,
+            current_score: score,
+            elapsed_time_sec: elapsedTimeSec(),
+            ...maxFruitParams()
+          });
+        }
       }
 
       function toFieldX(clientX) {
@@ -674,7 +1194,7 @@
       }
 
       function changeCurrentFruitForDebug(direction) {
-        if (!CONFIG.debugMode || state.isGameOver || !state.current) return;
+        if (!CONFIG.debugMode || isInteractionBlocked() || !state.current) return;
 
         const currentLevel = state.current.type === "fruit"
           ? fruitById.get(state.current.data.id).level
@@ -689,7 +1209,7 @@
       }
 
       function changeCurrentObstacleForDebug() {
-        if (!CONFIG.debugMode || state.isGameOver || !state.current) return;
+        if (!CONFIG.debugMode || isInteractionBlocked() || !state.current) return;
 
         const currentIndex = state.current.type === "obstacle"
           ? OBSTACLES.findIndex((obstacle) => obstacle.id === state.current.data.id)
@@ -703,19 +1223,35 @@
         resetHoldUi();
       }
 
-      function dropCurrent() {
-        if (state.isGameOver || !state.current) return;
+      function dropCurrent(inputType = "unknown") {
+        if (isInteractionBlocked() || !state.current) return;
+        const drop = state.current;
+        trackGameStart(inputType);
         state.lastDropAt = now();
-        const body = createFruitBody(state.current, clampCurrentX(state.pointerX), CONFIG.spawnY);
+        const body = createFruitBody(drop, clampCurrentX(state.pointerX), CONFIG.spawnY);
         addBody(body);
+        state.dropCount += 1;
+        if (drop.type === "obstacle") {
+          state.obstacleCount += 1;
+        } else {
+          trackMaxFruitReached(drop.data);
+        }
+        trackGameEvent("fruit_drop", {
+          fruit_type: drop.data.id,
+          fruit_level: drop.type === "fruit" ? fruitById.get(drop.data.id).level : -1,
+          drop_type: drop.type,
+          drop_count: state.dropCount,
+          current_score: state.score
+        });
         state.current = null;
         setTimeout(() => {
           if (!state.isGameOver) prepareQueue();
         }, 360);
       }
 
-      function throwAwayCurrentObstacle() {
-        if (!state.current || state.current.type !== "obstacle") return;
+      function throwAwayCurrentObstacle(inputType = "unknown") {
+        if (isInteractionBlocked() || !state.current || state.current.type !== "obstacle") return;
+        trackGameStart(inputType);
         const x = clampCurrentX(state.pointerX);
         const radius = state.current.data.radius;
         const leftSpace = x - radius;
@@ -771,7 +1307,7 @@
 
       // ===== Merge management =====
       function handleCollisionStart(event) {
-        if (state.isGameOver) return;
+        if (isInteractionBlocked()) return;
 
         for (const pair of event.pairs) {
           const a = pair.bodyA;
@@ -792,7 +1328,7 @@
       }
 
       function mergeBodies(a, b) {
-        if (state.isGameOver) return;
+        if (isInteractionBlocked()) return;
         const bodies = activeBodies();
         if (!bodies.includes(a) || !bodies.includes(b)) return;
         if (a.plugin.isMerging || b.plugin.isMerging) return;
@@ -808,6 +1344,7 @@
           y: (a.velocity.y + b.velocity.y) / 2
         };
 
+        state.mergeCount += 1;
         removeBodies([a, b]);
         setScore(state.score + fruit.score);
         createMergeEffect(x, y, fruit);
@@ -818,7 +1355,28 @@
           Body.setVelocity(nextBody, velocity);
           Body.setAngularVelocity(nextBody, (a.angularVelocity + b.angularVelocity) / 2);
           addBody(nextBody);
+          trackMaxFruitReached(nextData);
+          if (nextData.id === "watermelon") {
+            state.watermelonCount += 1;
+            trackGameEvent("watermelon_created", {
+              current_score: state.score,
+              elapsed_time_sec: elapsedTimeSec(),
+              drop_count: state.dropCount,
+              merge_count: state.mergeCount
+            });
+            scheduleWatermelonCelebration();
+          }
         }
+
+        trackGameEvent("fruit_merge", {
+          from_fruit_type: fruit.id,
+          from_fruit_level: a.plugin.level,
+          to_fruit_type: fruit.nextId || "none",
+          to_fruit_level: fruit.nextId ? fruitById.get(fruit.nextId).level : -1,
+          merge_score: fruit.score,
+          current_score: state.score,
+          merge_count: state.mergeCount
+        });
       }
 
       function createMergeEffect(x, y, fruit) {
@@ -839,7 +1397,7 @@
 
       // ===== Game state management =====
       function checkGameOver() {
-        if (state.isGameOver) return;
+        if (isInteractionBlocked()) return;
 
         const hasBodyOverLine = activeBodies().some((body) => {
           const radius = body.plugin.radius || 0;
@@ -858,10 +1416,31 @@
       function endGame() {
         state.isGameOver = true;
         state.current = null;
+        clearWatermelonCelebration();
         Runner.stop(state.runner);
         finalScoreEl.textContent = String(state.score);
+        trackGameEvent("game_over", {
+          final_score: state.score,
+          best_score: state.bestScore,
+          is_new_best: state.score > state.bestScoreAtStart,
+          play_time_sec: elapsedTimeSec(),
+          drop_count: state.dropCount,
+          merge_count: state.mergeCount,
+          watermelon_count: state.watermelonCount,
+          obstacle_count: state.obstacleCount,
+          ...maxFruitParams()
+        });
+        app.classList.add("is-game-over");
         overlay.classList.add("is-visible");
         resetHoldUi();
+      }
+
+      function trackRestart() {
+        trackGameEvent("restart", {
+          previous_score: state.score,
+          previous_play_time_sec: elapsedTimeSec(),
+          previous_max_fruit_level: state.maxFruitLevel
+        });
       }
 
       function restartGame() {
@@ -876,6 +1455,17 @@
         state.engine = createEngine();
         state.runner = Runner.create();
         state.isGameOver = false;
+        state.sessionId = createSessionId();
+        state.playStartedAt = 0;
+        state.hasTrackedGameStart = false;
+        state.dropCount = 0;
+        state.mergeCount = 0;
+        state.watermelonCount = 0;
+        state.obstacleCount = 0;
+        state.maxFruitLevel = -1;
+        state.hasTrackedBestScoreUpdate = false;
+        clearWatermelonCelebration();
+        state.hasShownWatermelonModal = false;
         state.current = null;
         state.next = null;
         state.pointerX = CONFIG.fieldWidth / 2;
@@ -884,7 +1474,9 @@
         state.effects = [];
         state.pendingMerges.clear();
         setBestScore(readBestScore());
+        state.bestScoreAtStart = state.bestScore;
         setScore(0);
+        app.classList.remove("is-game-over");
         overlay.classList.remove("is-visible");
         resetHoldUi();
         prepareQueue();
@@ -942,14 +1534,166 @@
         holdMeterBar.style.setProperty("--hold", "0%");
       }
 
+      function isInteractionBlocked() {
+        return state.isGameOver || state.isModalOpen || state.isCelebrationPending;
+      }
+
+      function clearWatermelonCelebration() {
+        if (state.celebrationTimer) clearTimeout(state.celebrationTimer);
+        state.celebrationTimer = 0;
+        state.isCelebrationPending = false;
+      }
+
+      function scheduleWatermelonCelebration() {
+        if (state.hasShownWatermelonModal) return;
+        state.hasShownWatermelonModal = true;
+        clearWatermelonCelebration();
+        state.isCelebrationPending = true;
+        resetHoldUi();
+        state.celebrationTimer = window.setTimeout(() => {
+          state.celebrationTimer = 0;
+          if (state.isGameOver) {
+            state.isCelebrationPending = false;
+            return;
+          }
+          showImageModal("watermelon");
+        }, CONFIG.watermelonModalDelayMs);
+      }
+
+      function pauseForImageModal(markTutorialSeen = false) {
+        state.isModalOpen = true;
+        state.isCelebrationPending = false;
+        state.modalMarksTutorialSeen = markTutorialSeen;
+        state.modalPausedRunner = Boolean(state.runner && !state.isGameOver);
+        if (state.modalPausedRunner) Runner.stop(state.runner);
+        resetHoldUi();
+      }
+
+      function resumeFromImageModal() {
+        const shouldResume = state.modalPausedRunner && !state.isGameOver;
+        state.isModalOpen = false;
+        state.modalPausedRunner = false;
+        if (state.modalMarksTutorialSeen) {
+          localStorage.setItem(TUTORIAL_SEEN_KEY, "1");
+          state.modalMarksTutorialSeen = false;
+        }
+        imageModal.classList.remove("is-visible");
+        imageModal.setAttribute("aria-hidden", "true");
+        imageModalPanel.classList.remove("is-wide");
+        imageModalPanel.classList.remove("is-tutorial");
+        tutorialContent.hidden = true;
+        congratsSocialActions.hidden = true;
+        congratsCopyFeedback.classList.remove("is-visible");
+        if (shouldResume) Runner.run(state.runner, state.engine);
+      }
+
+      function showImageModal(kind, options = {}) {
+        const isTutorial = kind === "tutorial";
+        const imageSrc = isTutorial ? MODAL_IMAGES.tutorial : MODAL_IMAGES.watermelon;
+        const label = isTutorial ? "チュートリアル" : "スイカ完成おめでとう画像";
+        const appWidth = document.querySelector(".app")?.getBoundingClientRect().width;
+        if (appWidth) imageModal.style.setProperty("--modal-reference-width", `${Math.round(appWidth)}px`);
+        imageModalPanel.classList.toggle("is-wide", !isTutorial);
+        imageModalPanel.classList.toggle("is-tutorial", isTutorial);
+        tutorialContent.hidden = !isTutorial;
+        congratsSocialActions.hidden = isTutorial;
+        congratsCopyFeedback.classList.remove("is-visible");
+        imageModalTitle.textContent = label;
+        imageModalImage.alt = label;
+        imageModalImage.hidden = isTutorial || !imageSrc;
+        imageModalPlaceholder.hidden = isTutorial || Boolean(imageSrc);
+        if (imageSrc) imageModalImage.src = imageSrc;
+        pauseForImageModal(Boolean(options.markTutorialSeen));
+        imageModal.classList.add("is-visible");
+        imageModal.setAttribute("aria-hidden", "false");
+      }
+
+      function maybeShowInitialTutorial() {
+        if (localStorage.getItem(TUTORIAL_SEEN_KEY)) return;
+        showImageModal("tutorial", { markTutorialSeen: true });
+      }
+
+      function buildCongratsShareText() {
+        return [
+          "Congratulations!",
+          "イビルアイがモモン様に会えました！",
+          "",
+          "イビルアイのモモン様に会いたい♡",
+          GAME_URL,
+          "#モモン様に会いたい"
+        ].join("\n");
+      }
+
+      function buildGameOverShareText() {
+        return [
+          "イビルアイのモモン様に会いたい♡",
+          `今回のスコア：${finalScoreEl.textContent || state.score}`,
+          "",
+          "みんなも遊んでみて！",
+          GAME_URL,
+          "#モモン様に会いたい"
+        ].join("\n");
+      }
+
+      function openXPost(text) {
+        const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+        window.open(url, "_blank", "noopener,noreferrer");
+      }
+
+      function showCopyFeedback(element) {
+        element.textContent = "URLをコピーしました！";
+        element.classList.add("is-visible");
+        window.clearTimeout(element._hideTimer);
+        element._hideTimer = window.setTimeout(() => {
+          element.classList.remove("is-visible");
+        }, 1800);
+      }
+
+      async function copyGameUrl(feedbackElement) {
+        try {
+          if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(GAME_URL);
+          } else {
+            const textarea = document.createElement("textarea");
+            textarea.value = GAME_URL;
+            textarea.setAttribute("readonly", "");
+            textarea.style.position = "fixed";
+            textarea.style.opacity = "0";
+            document.body.appendChild(textarea);
+            state.allowProgrammaticSelection = true;
+            textarea.select();
+            document.execCommand("copy");
+            state.allowProgrammaticSelection = false;
+            textarea.remove();
+          }
+          showCopyFeedback(feedbackElement);
+        } catch {
+          state.allowProgrammaticSelection = false;
+          feedbackElement.textContent = GAME_URL;
+          feedbackElement.classList.add("is-visible");
+        }
+      }
+
       // ===== Input management =====
+      function preventNativeGesture(event) {
+        if (state.allowProgrammaticSelection) return;
+        if (event.target.closest?.("input, textarea")) return;
+        event.preventDefault();
+      }
+
+      function clearNativeSelection() {
+        if (state.allowProgrammaticSelection) return;
+        const selection = window.getSelection?.();
+        if (selection && !selection.isCollapsed) selection.removeAllRanges();
+      }
+
       function handlePointerMove(event) {
-        if (state.isGameOver) return;
+        if (isInteractionBlocked()) return;
         state.pointerX = clampCurrentX(toFieldX(event.clientX));
       }
 
       function handlePointerDown(event) {
-        if (state.isGameOver || event.button > 0) return;
+        if (isInteractionBlocked() || event.button > 0) return;
         event.preventDefault();
         shell.setPointerCapture?.(event.pointerId);
         state.pointerX = clampCurrentX(toFieldX(event.clientX));
@@ -958,7 +1702,7 @@
       }
 
       function handlePointerUp(event) {
-        if (state.isGameOver || !state.isPointerDown) return;
+        if (isInteractionBlocked() || !state.isPointerDown) return;
         event.preventDefault();
         state.pointerX = clampCurrentX(toFieldX(event.clientX));
         const elapsed = now() - state.holdStartAt;
@@ -968,24 +1712,32 @@
         if (!current) return;
         if (current.type === "obstacle") {
           if (elapsed < CONFIG.holdChargeMs) {
-            dropCurrent();
+            dropCurrent(event.pointerType || "unknown");
           } else if (elapsed >= CONFIG.holdReadyMs) {
-            throwAwayCurrentObstacle();
+            throwAwayCurrentObstacle(event.pointerType || "unknown");
           }
           return;
         }
 
-        dropCurrent();
+        dropCurrent(event.pointerType || "unknown");
       }
 
       function handleClickFallback(event) {
-        if (state.isGameOver || !state.current) return;
+        if (isInteractionBlocked() || !state.current) return;
         if (now() - state.lastDropAt < 120) return;
         state.pointerX = clampCurrentX(toFieldX(event.clientX));
-        dropCurrent();
+        dropCurrent("mouse");
       }
 
       function handleKeyDown(event) {
+        if (event.key === "Escape" && state.isModalOpen) {
+          event.preventDefault();
+          resumeFromImageModal();
+          return;
+        }
+
+        if (state.isModalOpen) return;
+
         if (CONFIG.debugMode && (event.key === "1" || event.key === "2")) {
           event.preventDefault();
           changeCurrentFruitForDebug(event.key === "1" ? -1 : 1);
@@ -999,13 +1751,13 @@
         }
 
         if (event.key !== " " && event.key !== "Enter") return;
-        if (state.isGameOver || !state.current) return;
+        if (isInteractionBlocked() || !state.current) return;
         event.preventDefault();
         if (state.current.type === "obstacle" && event.shiftKey) {
-          throwAwayCurrentObstacle();
+          throwAwayCurrentObstacle("keyboard");
           return;
         }
-        dropCurrent();
+        dropCurrent("keyboard");
       }
 
       shell.addEventListener("pointermove", handlePointerMove);
@@ -1013,11 +1765,76 @@
       shell.addEventListener("pointerup", handlePointerUp);
       shell.addEventListener("pointercancel", resetHoldUi);
       shell.addEventListener("click", handleClickFallback);
+      document.addEventListener("selectstart", preventNativeGesture);
+      document.addEventListener("dragstart", preventNativeGesture);
+      document.addEventListener("contextmenu", preventNativeGesture);
+      document.addEventListener("selectionchange", clearNativeSelection);
       window.addEventListener("keydown", handleKeyDown);
       restartButton.addEventListener("click", (event) => {
         event.preventDefault();
         event.stopPropagation();
+        trackRestart();
         restartGame();
+      });
+      gameOverShareButton.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        trackGameEvent("share_click", {
+          platform: "x",
+          share_context: "game_over",
+          score: state.score,
+          ...maxFruitParams()
+        });
+        openXPost(buildGameOverShareText());
+      });
+      gameOverCopyButton.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        trackGameEvent("share_click", {
+          platform: "copy",
+          share_context: "game_over",
+          score: state.score,
+          ...maxFruitParams()
+        });
+        copyGameUrl(gameOverCopyFeedback);
+      });
+      tutorialButton.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        showImageModal("tutorial");
+      });
+      congratsShareButton.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        trackGameEvent("share_click", {
+          platform: "x",
+          share_context: "congratulations",
+          score: state.score,
+          ...maxFruitParams()
+        });
+        openXPost(buildCongratsShareText());
+      });
+      congratsCopyButton.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        trackGameEvent("share_click", {
+          platform: "copy",
+          share_context: "congratulations",
+          score: state.score,
+          ...maxFruitParams()
+        });
+        copyGameUrl(congratsCopyFeedback);
+      });
+      imageModalClose.addEventListener("click", (event) => {
+        event.preventDefault();
+        resumeFromImageModal();
+      });
+      imageModal.addEventListener("click", (event) => {
+        if (event.target === imageModal) resumeFromImageModal();
+      });
+      imageModalImage.addEventListener("error", () => {
+        imageModalImage.hidden = true;
+        imageModalPlaceholder.hidden = false;
       });
 
       // ===== Rendering =====
@@ -1381,8 +2198,8 @@
       window.addEventListener("resize", resizeCanvasForDpr);
       preloadImages();
       restartGame();
+      maybeShowInitialTutorial();
     })();
   </script>
 </body>
 </html>
-
